@@ -1,0 +1,30 @@
+name: HopperLimitUpgrades
+version: '1.0.0'
+main: com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades
+api-version: '1.21'
+depend:
+    - SkyLib
+    - Vault
+
+permissions:
+    hopperlimitupgrades.commands.hopperlimitupgrades:
+        description: Base permission.
+        default: op
+    hopperlimitupgrades.commands.hopperlimitupgrades.gui:
+        description: Permission to open the upgrades GUI.
+        default: op
+    hopperlimitupgrades.commands.hopperlimitupgrades.set:
+        description: Permission to set a player's hopper limit offset.
+        default: op
+    hopperlimitupgrades.commands.hopperlimitupgrades.add:
+        description: Permission to add to a player's hopper limit offset.
+        default: op
+    hopperlimitupgrades.commands.hopperlimitupgrades.remove:
+        description: Permission to remove from a player's hopper limit offset.
+        default: op
+    hopperlimitupgrades.commands.hopperlimitupgrades.reset:
+        description: Permission to reset a player's hopper limit offset.
+        default: op
+    hopperlimitupgrades.commands.hopperlimitupgrades.get:
+        description: Permission to view a player's hopper limit.
+        default: op
