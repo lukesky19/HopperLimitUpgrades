@@ -2,6 +2,7 @@ package com.github.lukesky19.hopperlimitupgrades.command;
 
 import com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades;
 import com.github.lukesky19.hopperlimitupgrades.gui.UpgradeGUI;
+import com.github.lukesky19.hopperlimitupgrades.manager.GUIManager;
 import com.github.lukesky19.hopperlimitupgrades.manager.LimitManager;
 import com.github.lukesky19.skylib.format.FormatUtil;
 import com.mojang.brigadier.Command;
@@ -22,7 +23,7 @@ import world.bentobox.bentobox.database.objects.Island;
 import java.util.Objects;
 
 public class UpgradeCommand {
-    public static LiteralCommandNode<CommandSourceStack> createCommand(HopperLimitUpgrades plugin) {
+    public static LiteralCommandNode<CommandSourceStack> createCommand(HopperLimitUpgrades plugin, GUIManager guiManager) {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("hopperlimitupgrades").executes(ctx -> {
             final CommandSender sender = ctx.getSource().getSender();
 
@@ -34,7 +35,7 @@ public class UpgradeCommand {
 
                         return 0;
                     } else {
-                        UpgradeGUI gui = new UpgradeGUI(plugin, player);
+                        UpgradeGUI gui = new UpgradeGUI(plugin, guiManager, player);
 
                         gui.openInventory(plugin, player);
 

@@ -1,10 +1,9 @@
 plugins {
     java
-    id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
 group = "com.github.lukesky19"
-version = "1.0.0"
+version = "1.1.0.0"
 
 repositories {
     mavenCentral()
@@ -33,13 +32,13 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
-    compileOnly("com.github.lukesky19:SkyLib:1.1.0")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("com.github.lukesky19:SkyLib:1.2.0.0")
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
 
     // Hooks
-    compileOnly("world.bentobox:bentobox:2.7.0-SNAPSHOT")
-    compileOnly("world.bentobox:limits:1.26.0-SNAPSHOT")
+    compileOnly("world.bentobox:bentobox:3.1.0-SNAPSHOT")
+    compileOnly("world.bentobox:limits:1.27.0-SNAPSHOT")
 }
 
 java {
@@ -64,8 +63,4 @@ tasks.jar {
 
 tasks.build {
     dependsOn(tasks.jar)
-}
-
-tasks.runServer {
-    minecraftVersion("1.21.3")
 }

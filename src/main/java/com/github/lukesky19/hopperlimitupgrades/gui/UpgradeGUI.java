@@ -1,14 +1,21 @@
 package com.github.lukesky19.hopperlimitupgrades.gui;
 
 import com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades;
+import com.github.lukesky19.hopperlimitupgrades.manager.GUIManager;
 import com.github.lukesky19.skylib.format.FormatUtil;
 import com.github.lukesky19.skylib.gui.GUIButton;
-import com.github.lukesky19.skylib.gui.InventoryGUI;
+import com.github.lukesky19.skylib.gui.GUIType;
+import com.github.lukesky19.skylib.gui.abstracts.ChestGUI;
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.api.user.User;
@@ -17,55 +24,95 @@ import world.bentobox.limits.Limits;
 import world.bentobox.limits.listeners.BlockLimitsListener;
 import world.bentobox.limits.objects.IslandBlockCount;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
-public class UpgradeGUI extends InventoryGUI {
+public class UpgradeGUI extends ChestGUI {
     private final HopperLimitUpgrades plugin;
+    private final GUIManager guiManager;
     private final Island island;
 
-    public UpgradeGUI(HopperLimitUpgrades plugin, Player player) {
+    public UpgradeGUI(HopperLimitUpgrades plugin, GUIManager guiManager, Player player) {
         this.plugin = plugin;
+        this.guiManager = guiManager;
         this.island = BentoBox.getInstance().getIslands().getIsland(Objects.requireNonNull(Bukkit.getWorld("bskyblock_world")), User.getInstance(player.getUniqueId()));
 
-        createInventory();
-        decorate();
+        createInventory(player, GUIType.CHEST_27, "<gold><bold>Hopper Limit Upgrades</bold></gold>", null);
+
+        update();
     }
 
-    public void createInventory() {
-        setInventory(plugin.getServer().createInventory(this, 27, FormatUtil.format("<gold><bold>Hopper Limit Upgrades</bold></gold>")));
+    @Override
+    public void update() {
+        clearButtons();
+
+        createFiller();
+        createAccent();
+        createExit();
+        createUpgrades();
+
+        super.update();
     }
 
-    public void decorate() {
-        // Set filler
-        GUIButton filler = new GUIButton.Builder().setMaterial(Material.GRAY_STAINED_GLASS_PANE).setItemName(FormatUtil.format(" ")).build();
+    private void createFiller() {
+        GUIButton.Builder fillerBuilder = new GUIButton.Builder();
+
+        ItemStack fillerStack = ItemStack.of(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta fillerMeta = fillerStack.getItemMeta();
+
+        fillerMeta.displayName(FormatUtil.format(" "));
+
+        fillerStack.setItemMeta(fillerMeta);
+
+        fillerBuilder.setItemStack(fillerStack);
+
+        GUIButton fillerButton = fillerBuilder.build();
 
         for (int i = 0; i <= 26; i++) {
-            setButton(i, filler);
+            setButton(i, fillerButton);
         }
+    }
 
-        GUIButton accent = new GUIButton.Builder().setMaterial(Material.BLUE_STAINED_GLASS_PANE).setItemName(FormatUtil.format(" ")).build();
+    private void createAccent() {
+        GUIButton.Builder accentBuilder = new GUIButton.Builder();
 
-        setButton(0, accent);
-        setButton(8, accent);
-        setButton(9, accent);
-        setButton(17, accent);
-        setButton(18, accent);
-        setButton(26, accent);
+        ItemStack accentStack = ItemStack.of(Material.BLUE_STAINED_GLASS_PANE);
+        ItemMeta accentMeta = accentStack.getItemMeta();
 
+        accentMeta.displayName(FormatUtil.format(" "));
+
+        accentStack.setItemMeta(accentMeta);
+
+        accentBuilder.setItemStack(accentStack);
+
+        GUIButton accentButton = accentBuilder.build();
+
+        setButton(0, accentButton);
+        setButton(8, accentButton);
+        setButton(9, accentButton);
+        setButton(17, accentButton);
+        setButton(18, accentButton);
+        setButton(26, accentButton);
+    }
+
+    private void createExit() {
         // Add exit button
-        setButton(22, new GUIButton.Builder()
-                .setMaterial(Material.BARRIER)
-                .setItemName(FormatUtil.format("<red><bold>Exit the menu.</bold></red>"))
-                .setAction(event -> closeInventory(plugin, (Player) event.getWhoClicked()))
-                .build());
+        GUIButton.Builder exitBuilder = new GUIButton.Builder();
 
-        // 00 01 02 03 04 05 06 07 08
-        // 09 10 11 12 13 14 15 16 17
-        // 18 19 20 21 22 23 24 25 26
+        ItemStack exitStack = ItemStack.of(Material.BARRIER);
+        ItemMeta exitMeta = exitStack.getItemMeta();
 
-        // Add upgrades
+        exitMeta.displayName(FormatUtil.format("<red><bold>Exit the menu.</bold></red>"));
+
+        exitStack.setItemMeta(exitMeta);
+
+        exitBuilder.setItemStack(exitStack);
+
+        exitBuilder.setAction(event -> closeInventory(plugin, (Player) event.getWhoClicked()));
+
+        setButton(22, exitBuilder.build());
+    }
+
+    private void createUpgrades() {
         Optional<Addon> limits = BentoBox.getInstance().getAddonsManager().getAddonByName("Limits");
         if(limits.isEmpty()) return;
 
@@ -81,32 +128,52 @@ public class UpgradeGUI extends InventoryGUI {
                     FormatUtil.format(" "),
                     FormatUtil.format("<gray>Click here to upgrade your island hopper limit to 35.</gray>"));
 
-            setButton(11, new GUIButton.Builder()
-                    .setMaterial(Material.HOPPER)
-                    .setItemName(FormatUtil.format("<aqua>35 Hopper Limit</aqua>"))
-                    .setLore(lore)
-                    .setAction(inventoryClickEvent -> {
-                        Player player = (Player) inventoryClickEvent.getWhoClicked();
-                        Economy economy = plugin.getEconomy();
+            GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
 
-                        if(economy.getBalance(player) >= 75000) {
-                            economy.withdrawPlayer(player, 75000);
-                            islandBlockCount.setBlockLimitsOffset(Material.HOPPER, 10);
-                            player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><dark_green>Upgraded hopper limit to 35.</dark_green>"));
+            ItemStack upgradeStack = ItemStack.of(Material.HOPPER);
+            ItemMeta upgradeMeta = upgradeStack.getItemMeta();
 
-                            decorate();
-                        } else {
-                            player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><red>You do not have enough money for this upgrade.</red>"));
-                        }
-                    }).build());
+            upgradeMeta.displayName(FormatUtil.format("<aqua>35 Hopper Limit</aqua>"));
+
+            upgradeMeta.lore(lore);
+
+            upgradeStack.setItemMeta(upgradeMeta);
+
+            upgradeBuilder.setItemStack(upgradeStack);
+
+            upgradeBuilder.setAction(inventoryClickEvent -> {
+                Player player = (Player) inventoryClickEvent.getWhoClicked();
+                Economy economy = plugin.getEconomy();
+
+                if (economy.getBalance(player) >= 75000) {
+                    economy.withdrawPlayer(player, 75000);
+                    islandBlockCount.setBlockLimitsOffset(Material.HOPPER, 10);
+                    player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><dark_green>Upgraded hopper limit to 35.</dark_green>"));
+
+                    update();
+                } else {
+                    player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><red>You do not have enough money for this upgrade.</red>"));
+                }
+            });
+
+            setButton(11, upgradeBuilder.build());
         } else {
             List<Component> lore = List.of(FormatUtil.format("<red>You already have this upgrade.</red>"));
 
-            setButton(11, new GUIButton.Builder()
-                    .setMaterial(Material.HOPPER)
-                    .setItemName(FormatUtil.format("<aqua>35 Hopper Limit</aqua>"))
-                    .setLore(lore)
-                    .build());
+            GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
+
+            ItemStack upgradeStack = ItemStack.of(Material.HOPPER);
+            ItemMeta upgradeMeta = upgradeStack.getItemMeta();
+
+            upgradeMeta.displayName(FormatUtil.format("<aqua>35 Hopper Limit</aqua>"));
+
+            upgradeMeta.lore(lore);
+
+            upgradeStack.setItemMeta(upgradeMeta);
+
+            upgradeBuilder.setItemStack(upgradeStack);
+
+            setButton(11, upgradeBuilder.build());
         }
 
         if(hopperLimitOffset < 20) {
@@ -115,32 +182,52 @@ public class UpgradeGUI extends InventoryGUI {
                     FormatUtil.format(" "),
                     FormatUtil.format("<gray>Click here to upgrade your island hopper limit to 45.</gray>"));
 
-            setButton(12, new GUIButton.Builder()
-                    .setMaterial(Material.HOPPER)
-                    .setItemName(FormatUtil.format("<aqua>45 Hopper Limit</aqua>"))
-                    .setLore(lore)
-                    .setAction(inventoryClickEvent -> {
-                        Player player = (Player) inventoryClickEvent.getWhoClicked();
-                        Economy economy = plugin.getEconomy();
+            GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
 
-                        if(economy.getBalance(player) >= 90000) {
-                            economy.withdrawPlayer(player, 90000);
-                            islandBlockCount.setBlockLimitsOffset(Material.HOPPER, 20);
-                            player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><dark_green>Upgraded hopper limit to 45.</dark_green>"));
+            ItemStack upgradeStack = ItemStack.of(Material.HOPPER);
+            ItemMeta upgradeMeta = upgradeStack.getItemMeta();
 
-                            decorate();
-                        } else {
-                            player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><red>You do not have enough money for this upgrade.</red>"));
-                        }
-                    }).build());
+            upgradeMeta.displayName(FormatUtil.format("<aqua>45 Hopper Limit</aqua>"));
+
+            upgradeMeta.lore(lore);
+
+            upgradeStack.setItemMeta(upgradeMeta);
+
+            upgradeBuilder.setItemStack(upgradeStack);
+
+            upgradeBuilder.setAction(inventoryClickEvent -> {
+                Player player = (Player) inventoryClickEvent.getWhoClicked();
+                Economy economy = plugin.getEconomy();
+
+                if(economy.getBalance(player) >= 90000) {
+                    economy.withdrawPlayer(player, 90000);
+                    islandBlockCount.setBlockLimitsOffset(Material.HOPPER, 20);
+                    player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><dark_green>Upgraded hopper limit to 45.</dark_green>"));
+
+                    update();
+                } else {
+                    player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><red>You do not have enough money for this upgrade.</red>"));
+                }
+            });
+
+            setButton(12, upgradeBuilder.build());
         } else {
             List<Component> lore = List.of(FormatUtil.format("<red>You already have this upgrade.</red>"));
 
-            setButton(12, new GUIButton.Builder()
-                    .setMaterial(Material.HOPPER)
-                    .setItemName(FormatUtil.format("<aqua>45 Hopper Limit</aqua>"))
-                    .setLore(lore)
-                    .build());
+            GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
+
+            ItemStack upgradeStack = ItemStack.of(Material.HOPPER);
+            ItemMeta upgradeMeta = upgradeStack.getItemMeta();
+
+            upgradeMeta.displayName(FormatUtil.format("<aqua>45 Hopper Limit</aqua>"));
+
+            upgradeMeta.lore(lore);
+
+            upgradeStack.setItemMeta(upgradeMeta);
+
+            upgradeBuilder.setItemStack(upgradeStack);
+
+            setButton(12, upgradeBuilder.build());
         }
 
         if(hopperLimitOffset < 30) {
@@ -149,32 +236,52 @@ public class UpgradeGUI extends InventoryGUI {
                     FormatUtil.format(" "),
                     FormatUtil.format("<gray>Click here to upgrade your island hopper limit to 55.</gray>"));
 
-            setButton(13, new GUIButton.Builder()
-                    .setMaterial(Material.HOPPER)
-                    .setItemName(FormatUtil.format("<aqua>55 Hopper Limit</aqua>"))
-                    .setLore(lore)
-                    .setAction(inventoryClickEvent -> {
-                        Player player = (Player) inventoryClickEvent.getWhoClicked();
-                        Economy economy = plugin.getEconomy();
+            GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
 
-                        if(economy.getBalance(player) >= 105000) {
-                            economy.withdrawPlayer(player, 105000);
-                            islandBlockCount.setBlockLimitsOffset(Material.HOPPER, 30);
-                            player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><dark_green>Upgraded hopper limit to 55.</dark_green>"));
+            ItemStack upgradeStack = ItemStack.of(Material.HOPPER);
+            ItemMeta upgradeMeta = upgradeStack.getItemMeta();
 
-                            decorate();
-                        } else {
-                            player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><red>You do not have enough money for this upgrade.</red>"));
-                        }
-                    }).build());
+            upgradeMeta.displayName(FormatUtil.format("<aqua>55 Hopper Limit</aqua>"));
+
+            upgradeMeta.lore(lore);
+
+            upgradeStack.setItemMeta(upgradeMeta);
+
+            upgradeBuilder.setItemStack(upgradeStack);
+
+            upgradeBuilder.setAction(inventoryClickEvent -> {
+                Player player = (Player) inventoryClickEvent.getWhoClicked();
+                Economy economy = plugin.getEconomy();
+
+                if(economy.getBalance(player) >= 105000) {
+                    economy.withdrawPlayer(player, 105000);
+                    islandBlockCount.setBlockLimitsOffset(Material.HOPPER, 30);
+                    player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><dark_green>Upgraded hopper limit to 55.</dark_green>"));
+
+                    update();
+                } else {
+                    player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><red>You do not have enough money for this upgrade.</red>"));
+                }
+            });
+
+            setButton(13, upgradeBuilder.build());
         } else {
             List<Component> lore = List.of(FormatUtil.format("<red>You already have this upgrade.</red>"));
 
-            setButton(13, new GUIButton.Builder()
-                    .setMaterial(Material.HOPPER)
-                    .setItemName(FormatUtil.format("<aqua>55 Hopper Limit</aqua>"))
-                    .setLore(lore)
-                    .build());
+            GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
+
+            ItemStack upgradeStack = ItemStack.of(Material.HOPPER);
+            ItemMeta upgradeMeta = upgradeStack.getItemMeta();
+
+            upgradeMeta.displayName(FormatUtil.format("<aqua>55 Hopper Limit</aqua>"));
+
+            upgradeMeta.lore(lore);
+
+            upgradeStack.setItemMeta(upgradeMeta);
+
+            upgradeBuilder.setItemStack(upgradeStack);
+
+            setButton(13, upgradeBuilder.build());
         }
 
         if(hopperLimitOffset < 40) {
@@ -183,32 +290,52 @@ public class UpgradeGUI extends InventoryGUI {
                     FormatUtil.format(" "),
                     FormatUtil.format("<gray>Click here to upgrade your island hopper limit to 65.</gray>"));
 
-            setButton(14, new GUIButton.Builder()
-                    .setMaterial(Material.HOPPER)
-                    .setItemName(FormatUtil.format("<aqua>65 Hopper Limit</aqua>"))
-                    .setLore(lore)
-                    .setAction(inventoryClickEvent -> {
-                        Player player = (Player) inventoryClickEvent.getWhoClicked();
-                        Economy economy = plugin.getEconomy();
+            GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
 
-                        if(economy.getBalance(player) >= 135000) {
-                            economy.withdrawPlayer(player, 135000);
-                            islandBlockCount.setBlockLimitsOffset(Material.HOPPER, 40);
-                            player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><dark_green>Upgraded hopper limit to 65.</dark_green>"));
+            ItemStack upgradeStack = ItemStack.of(Material.HOPPER);
+            ItemMeta upgradeMeta = upgradeStack.getItemMeta();
 
-                            decorate();
-                        } else {
-                            player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><red>You do not have enough money for this upgrade.</red>"));
-                        }
-                    }).build());
+            upgradeMeta.displayName(FormatUtil.format("<aqua>65 Hopper Limit</aqua>"));
+
+            upgradeMeta.lore(lore);
+
+            upgradeStack.setItemMeta(upgradeMeta);
+
+            upgradeBuilder.setItemStack(upgradeStack);
+
+            upgradeBuilder.setAction(inventoryClickEvent -> {
+                Player player = (Player) inventoryClickEvent.getWhoClicked();
+                Economy economy = plugin.getEconomy();
+
+                if(economy.getBalance(player) >= 135000) {
+                    economy.withdrawPlayer(player, 135000);
+                    islandBlockCount.setBlockLimitsOffset(Material.HOPPER, 40);
+                    player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><dark_green>Upgraded hopper limit to 65.</dark_green>"));
+
+                    update();
+                } else {
+                    player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><red>You do not have enough money for this upgrade.</red>"));
+                }
+            });
+
+            setButton(14, upgradeBuilder.build());
         } else {
             List<Component> lore = List.of(FormatUtil.format("<red>You already have this upgrade.</red>"));
 
-            setButton(14, new GUIButton.Builder()
-                    .setMaterial(Material.HOPPER)
-                    .setItemName(FormatUtil.format("<aqua>65 Hopper Limit</aqua>"))
-                    .setLore(lore)
-                    .build());
+            GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
+
+            ItemStack upgradeStack = ItemStack.of(Material.HOPPER);
+            ItemMeta upgradeMeta = upgradeStack.getItemMeta();
+
+            upgradeMeta.displayName(FormatUtil.format("<aqua>65 Hopper Limit</aqua>"));
+
+            upgradeMeta.lore(lore);
+
+            upgradeStack.setItemMeta(upgradeMeta);
+
+            upgradeBuilder.setItemStack(upgradeStack);
+
+            setButton(14, upgradeBuilder.build());
         }
 
         if(hopperLimitOffset < 50) {
@@ -217,34 +344,79 @@ public class UpgradeGUI extends InventoryGUI {
                     FormatUtil.format(" "),
                     FormatUtil.format("<gray>Click here to upgrade your island hopper limit to 75.</gray>"));
 
-            setButton(15, new GUIButton.Builder()
-                    .setMaterial(Material.HOPPER)
-                    .setItemName(FormatUtil.format("<aqua>75 Hopper Limit</aqua>"))
-                    .setLore(lore)
-                    .setAction(inventoryClickEvent -> {
-                        Player player = (Player) inventoryClickEvent.getWhoClicked();
-                        Economy economy = plugin.getEconomy();
+            GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
 
-                        if(economy.getBalance(player) >= 150000) {
-                            economy.withdrawPlayer(player, 150000);
-                            islandBlockCount.setBlockLimitsOffset(Material.HOPPER, 50);
-                            player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><dark_green>Upgraded hopper limit to 75.</dark_green>"));
+            ItemStack upgradeStack = ItemStack.of(Material.HOPPER);
+            ItemMeta upgradeMeta = upgradeStack.getItemMeta();
 
-                            decorate();
-                        } else {
-                            player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><red>You do not have enough money for this upgrade.</red>"));
-                        }
-                    }).build());
+            upgradeMeta.displayName(FormatUtil.format("<aqua>75 Hopper Limit</aqua>"));
+
+            upgradeMeta.lore(lore);
+
+            upgradeStack.setItemMeta(upgradeMeta);
+
+            upgradeBuilder.setItemStack(upgradeStack);
+
+            upgradeBuilder.setAction(inventoryClickEvent -> {
+                Player player = (Player) inventoryClickEvent.getWhoClicked();
+                Economy economy = plugin.getEconomy();
+
+                if(economy.getBalance(player) >= 150000) {
+                    economy.withdrawPlayer(player, 150000);
+                    islandBlockCount.setBlockLimitsOffset(Material.HOPPER, 50);
+                    player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><dark_green>Upgraded hopper limit to 75.</dark_green>"));
+
+                    update();
+                } else {
+                    player.sendMessage(FormatUtil.format("<gold><bold>Upgrades</bold></gold><gray> ▪ </gray><red>You do not have enough money for this upgrade.</red>"));
+                }
+            });
+
+            setButton(15, upgradeBuilder.build());
         } else {
             List<Component> lore = List.of(FormatUtil.format("<red>You already have this upgrade.</red>"));
 
-            setButton(15, new GUIButton.Builder()
-                    .setMaterial(Material.HOPPER)
-                    .setItemName(FormatUtil.format("<aqua>75 Hopper Limit</aqua>"))
-                    .setLore(lore)
-                    .build());
-        }
+            GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
 
-        super.decorate();
+            ItemStack upgradeStack = ItemStack.of(Material.HOPPER);
+            ItemMeta upgradeMeta = upgradeStack.getItemMeta();
+
+            upgradeMeta.displayName(FormatUtil.format("<aqua>75 Hopper Limit</aqua>"));
+
+            upgradeMeta.lore(lore);
+
+            upgradeStack.setItemMeta(upgradeMeta);
+
+            upgradeBuilder.setItemStack(upgradeStack);
+
+            setButton(15, upgradeBuilder.build());
+        }
+    }
+
+    @Override
+    public void openInventory(@NotNull Plugin plugin, @NotNull Player player) {
+        super.openInventory(plugin, player);
+
+        guiManager.addOpenGUI(player.getUniqueId(), this);
+    }
+
+    @Override
+    public void closeInventory(@NotNull Plugin plugin, @NotNull Player player) {
+        UUID uuid = player.getUniqueId();
+
+        plugin.getServer().getScheduler().runTaskLater(plugin, () ->
+                player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
+
+        guiManager.removeOpenGUI(uuid);
+    }
+
+    @Override
+    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
+        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
+
+        Player player = (Player) inventoryCloseEvent.getPlayer();
+        UUID uuid = player.getUniqueId();
+
+        guiManager.removeOpenGUI(uuid);
     }
 }
