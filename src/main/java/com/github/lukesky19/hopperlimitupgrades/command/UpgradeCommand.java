@@ -37,7 +37,7 @@ public class UpgradeCommand {
                     } else {
                         UpgradeGUI gui = new UpgradeGUI(plugin, guiManager, player);
 
-                        gui.openInventory(plugin, player);
+                        gui.open(plugin, player);
 
                         return Command.SINGLE_SUCCESS;
                     }

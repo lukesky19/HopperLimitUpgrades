@@ -36,7 +36,7 @@ public class UpgradeGUI extends ChestGUI {
         this.guiManager = guiManager;
         this.island = BentoBox.getInstance().getIslands().getIsland(Objects.requireNonNull(Bukkit.getWorld("bskyblock_world")), User.getInstance(player.getUniqueId()));
 
-        createInventory(player, GUIType.CHEST_27, "<gold><bold>Hopper Limit Upgrades</bold></gold>", null);
+        create(player, GUIType.CHEST_27, "<gold><bold>Hopper Limit Upgrades</bold></gold>", null);
 
         update();
     }
@@ -107,7 +107,7 @@ public class UpgradeGUI extends ChestGUI {
 
         exitBuilder.setItemStack(exitStack);
 
-        exitBuilder.setAction(event -> closeInventory(plugin, (Player) event.getWhoClicked()));
+        exitBuilder.setAction(event -> close(plugin, (Player) event.getWhoClicked()));
 
         setButton(22, exitBuilder.build());
     }
@@ -394,25 +394,36 @@ public class UpgradeGUI extends ChestGUI {
     }
 
     @Override
-    public void openInventory(@NotNull Plugin plugin, @NotNull Player player) {
-        super.openInventory(plugin, player);
+    public void open(@NotNull Plugin plugin, @NotNull Player player) {
+        super.open(plugin, player);
 
         guiManager.addOpenGUI(player.getUniqueId(), this);
     }
 
     @Override
-    public void closeInventory(@NotNull Plugin plugin, @NotNull Player player) {
+    public void close(@NotNull Plugin plugin, @NotNull Player player) {
         UUID uuid = player.getUniqueId();
 
         plugin.getServer().getScheduler().runTaskLater(plugin, () ->
-                player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
+                player.closeInventory(InventoryCloseEvent.Reason.UNLOADED), 1L);
 
         guiManager.removeOpenGUI(uuid);
     }
 
     @Override
+    public void unload(@NotNull Plugin plugin, @NotNull Player player, boolean onDisable) {
+        if(onDisable) {
+            player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
+        } else {
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> player.closeInventory(InventoryCloseEvent.Reason.UNLOADED), 1L);
+        }
+
+        guiManager.removeOpenGUI(player.getUniqueId());
+    }
+
+    @Override
     public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
+        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED)) return;
 
         Player player = (Player) inventoryCloseEvent.getPlayer();
         UUID uuid = player.getUniqueId();
