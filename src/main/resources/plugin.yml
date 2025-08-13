@@ -14,6 +14,9 @@ permissions:
     hopperlimitupgrades.commands.hopperlimitupgrades.reload:
         description: Permission to reload the plugin.
         default: op
+    hopperlimitupgrades.commands.hopperlimitupgrades.help:
+        description: Permission to view the plugin's help message.
+        default: op
     hopperlimitupgrades.commands.hopperlimitupgrades.set:
         description: Permission to set a player's hopper limit offset.
         default: op

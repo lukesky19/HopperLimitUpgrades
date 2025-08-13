@@ -107,6 +107,20 @@ public class UpgradeCommand {
 
             return 1;
         });
+        
+        builder.then(Commands.literal("help")
+            .requires(ctx -> ctx.getSender().hasPermission("hopperlimitupgrades.commands.hopperlimitupgrades.help"))
+            .executes(ctx -> {
+                Locale locale = localeManager.getLocale();
+                CommandSender sender = ctx.getSource().getSender();
+
+                for (String msg : locale.help()) {
+                    sender.sendMessage(AdventureUtil.serialize(msg));
+                }
+                
+                return 1;
+            })
+        );
 
         builder.then(Commands.literal("reset")
             .requires(ctx -> ctx.getSender().hasPermission("hopperlimitupgrades.commands.hopperlimitupgrades.reset"))

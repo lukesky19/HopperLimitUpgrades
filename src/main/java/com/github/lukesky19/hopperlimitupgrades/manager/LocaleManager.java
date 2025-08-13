@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * This class loads the plugin's locale configuration.
@@ -24,6 +25,18 @@ public class LocaleManager {
             "1.0.0.0",
             "<gold><bold>HopperLimitUpgrades</bold></gold><gray> ▪ </gray>",
             "<dark_green>The plugin has been reloaded.</dark_green>",
+            List.of("<aqua>HopperLimitUpgrades is developed by <white><bold>lukeskywlker19</bold></white>.</aqua>",
+                    "<aqua>Source code is released on GitHub: <click:OPEN_URL:https://github.com/lukesky19><yellow><underlined><bold>https://github.com/lukesky19</bold></underlined></yellow></click></aqua>",
+                    " ",
+                    "<aqua><bold>List of Commands:</bold></aqua>",
+                    "<white>/</white><aqua>hopperlimitupgrades</aqua>",
+                    "<white>/</white><aqua>hopperlimitupgrades</aqua> <yellow>reload</yellow>",
+                    "<white>/</white><aqua>hopperlimitupgrades</aqua> <yellow>help</yellow>",
+                    "<white>/</white><aqua>hopperlimitupgrades</aqua> <yellow>reset <player name></yellow>",
+                    "<white>/</white><aqua>hopperlimitupgrades</aqua> <yellow>set <player name> <amount></yellow>",
+                    "<white>/</white><aqua>hopperlimitupgrades</aqua> <yellow>add <player name> <amount></yellow>",
+                    "<white>/</white><aqua>hopperlimitupgrades</aqua> <yellow>remove <player name> <amount></yellow>",
+                    "<white>/</white><aqua>hopperlimitupgrades</aqua> <yellow>get <player name></yellow>"),
             "<red>The upgrade GUI can only be open by players.</red>",
             "<red>You must be on an island to open the upgrade GUI.</red>",
             "<red>Only the island owner and island members can open the upgrade GUI.</red>",
