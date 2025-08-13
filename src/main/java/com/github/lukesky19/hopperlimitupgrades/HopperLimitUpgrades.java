@@ -2,8 +2,8 @@ package com.github.lukesky19.hopperlimitupgrades;
 
 import com.github.lukesky19.hopperlimitupgrades.command.UpgradeCommand;
 import com.github.lukesky19.hopperlimitupgrades.listener.InventoryListener;
-import com.github.lukesky19.hopperlimitupgrades.manager.GUIManager;
-import com.github.lukesky19.skylib.format.FormatUtil;
+import com.github.lukesky19.hopperlimitupgrades.manager.*;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
@@ -11,37 +11,105 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import world.bentobox.bentobox.BentoBox;
+import world.bentobox.bentobox.api.addons.Addon;
+import world.bentobox.limits.Limits;
 
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * The plugin's main class.
+ */
 public final class HopperLimitUpgrades extends JavaPlugin {
+    private SettingsManager settingsManager;
+    private LocaleManager localeManager;
+    private GUIConfigManager guiConfigManager;
     private GUIManager guiManager;
     private Economy economy;
+    private Limits limitsAddon;
 
-    public Economy getEconomy() {
+    /**
+     * Get the server's {@link Economy}.
+     * @return The {@link Economy}.
+     */
+    public @NotNull Economy getEconomy() {
         return economy;
     }
 
+    /**
+     * Get the {@link Limits} addon.
+     * @return The {@link Limits} addon.
+     */
+    public @NotNull Limits getLimitsAddon() {
+        return limitsAddon;
+    }
+
+    /**
+     * Default Constructor
+     */
+    public HopperLimitUpgrades() {}
+
+    /**
+     * The method ran when the plugin is enabled.
+     */
     @Override
     public void onEnable() {
         // Plugin startup logic
-        boolean skyLibResult = checkSkyLibVersion();
-        if(!skyLibResult) return;
-        boolean econResult = setupEconomy();
-        if(!econResult) return;
+        if(!checkSkyLibVersion()) return;
+        if(!setupEconomy()) return;
+        if(!setupLevelAddon()) return;
 
+        settingsManager = new SettingsManager(this);
+        localeManager = new LocaleManager(this, settingsManager);
+        guiConfigManager = new GUIConfigManager(this);
         guiManager = new GUIManager(this);
+        LimitManager limitManager = new LimitManager(this, localeManager);
+        UpgradeCommand upgradeCommand = new UpgradeCommand(this, localeManager, guiConfigManager, guiManager, limitManager);
 
         this.getServer().getPluginManager().registerEvents(new InventoryListener(guiManager), this);
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands ->
-                commands.registrar().register(UpgradeCommand.createCommand(this, guiManager),
+                commands.registrar().register(upgradeCommand.createCommand(),
                         "Command to upgrade and manage hopper limits.", List.of("upgrade", "upgrades", "hopperupgrade", "hopperupgrades")));
+
+        reload();
     }
 
+    /**
+     * The method ran when the plugin is disabled.
+     */
     @Override
     public void onDisable() {
-        guiManager.closeOpenGUIs(true);
+        if(guiManager != null) guiManager.closeOpenGUIs(true);
+    }
+
+    /**
+     * The plugin's main reload method.
+     */
+    public void reload() {
+        settingsManager.reload();
+        localeManager.reload();
+        guiConfigManager.reload();
+    }
+
+    /**
+     * Checks for the Limits addon as a dependency.
+     */
+    private boolean setupLevelAddon() {
+        Optional<Addon> optionalAddon = BentoBox.getInstance().getAddonsManager().getAddonByName("Limits");
+        if(optionalAddon.isEmpty()) {
+            this.getComponentLogger().error(AdventureUtil.serialize("<red>HopperLimitUpgrades has been disabled due to no Limits addon dependency found!</red>"));
+
+            this.getServer().getPluginManager().disablePlugin(this);
+
+            return false;
+        }
+
+        limitsAddon = (Limits) optionalAddon.get();
+
+        return true;
     }
 
     /**
@@ -66,7 +134,6 @@ public final class HopperLimitUpgrades extends JavaPlugin {
      * Checks if the Server has the proper SkyLib version.
      * @return true if it does, false if not.
      */
-    @SuppressWarnings("UnstableApiUsage")
     private boolean checkSkyLibVersion() {
         PluginManager pluginManager = this.getServer().getPluginManager();
         Plugin skyLib = pluginManager.getPlugin("SkyLib");
@@ -75,12 +142,12 @@ public final class HopperLimitUpgrades extends JavaPlugin {
             String[] splitVersion = version.split("\\.");
             int second = Integer.parseInt(splitVersion[1]);
 
-            if(second >= 2) {
+            if(second >= 3) {
                 return true;
             }
         }
 
-        this.getComponentLogger().error(FormatUtil.format("SkyLib Version 1.2.0.0 or newer is required to run this plugin."));
+        this.getComponentLogger().error(AdventureUtil.serialize("SkyLib Version 1.3.0.0 or newer is required to run this plugin."));
         this.getServer().getPluginManager().disablePlugin(this);
         return false;
     }

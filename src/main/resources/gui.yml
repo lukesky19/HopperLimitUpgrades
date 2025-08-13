@@ -1,0 +1,143 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
+config-version: 1.0.0.0
+gui-name: "<gold><bold>Hopper Limit Upgrades</bold></gold>"
+gui-type: CHEST_27
+filler:
+    item-type: gray_stained_glass_pane
+    name: " "
+    amount: 1
+next-page:
+    item:
+        item-type: arrow
+        name: "<white>Next Page"
+        amount: 1
+    slot: 26
+prev-page:
+    item:
+        item-type: arrow
+        name: "<white>Previous Page"
+        amount: 1
+    slot: 18
+exit:
+    item:
+        item-type: barrier
+        name: "<red>Click to close the GUI.</red>"
+        lore: []
+        amount: 1
+    slot: 22
+dummy-buttons:
+    -   item:
+            item-type: blue_stained_glass_pane
+            name: " "
+        slot: 0
+    -   item:
+            item-type: blue_stained_glass_pane
+            name: " "
+        slot: 8
+    -   item:
+            item-type: blue_stained_glass_pane
+            name: " "
+        slot: 9
+    -   item:
+            item-type: blue_stained_glass_pane
+            name: " "
+        slot: 17
+    -   item:
+            item-type: blue_stained_glass_pane
+            name: " "
+        slot: 18
+    -   item:
+            item-type: blue_stained_glass_pane
+            name: " "
+        slot: 26
+upgrade-buttons:
+    -   purchasable-item:
+            item-type: HOPPER
+            name: "<aqua>35 Hopper Limit</aqua>"
+            lore:
+                - "<gray>Cost:</gray> <dark_green>$75,000</dark_green>"
+                - " "
+                - "<gray>Click here to upgrade your island hopper limit to 35.</gray>"
+        purchased-item:
+            item-type: HOPPER
+            name: "<aqua>35 Hopper Limit</aqua>"
+            lore:
+                - "<red>You already have this upgrade.</red>"
+        slot: 11
+        # This is the additional amount to set for the player's island.
+        # So 25 + 10 = 35 (base_amount + offset_amount = total_amount)
+        offset-amount: 10
+        # The cost to buy the additional offset.
+        price: 75000
+    -   purchasable-item:
+            item-type: HOPPER
+            name: "<aqua>45 Hopper Limit</aqua>"
+            lore:
+                - "<gray>Cost:</gray> <dark_green>$90,000</dark_green>"
+                - " "
+                - "<gray>Click here to upgrade your island hopper limit to 45.</gray>"
+        purchased-item:
+            item-type: HOPPER
+            name: "<aqua>45 Hopper Limit</aqua>"
+            lore:
+                - "<red>You already have this upgrade.</red>"
+        slot: 12
+        # This is the additional amount to set for the player's island.
+        # So 25 + 20 = 45 (base_amount + offset_amount = total_amount)
+        offset-amount: 20
+        # The cost to buy the additional offset.
+        price: 90000
+    -   purchasable-item:
+            item-type: HOPPER
+            name: "<aqua>55 Hopper Limit</aqua>"
+            lore:
+                - "<gray>Cost:</gray> <dark_green>$105,000</dark_green>"
+                - " "
+                - "<gray>Click here to upgrade your island hopper limit to 55.</gray>"
+        purchased-item:
+            item-type: HOPPER
+            name: "<aqua>55 Hopper Limit</aqua>"
+            lore:
+                - "<red>You already have this upgrade.</red>"
+        slot: 13
+        # This is the additional amount to set for the player's island.
+        # So 25 + 30 = 55 (base_amount + offset_amount = total_amount)
+        offset-amount: 30
+        # The cost to buy the additional offset.
+        price: 105000
+    -   purchasable-item:
+            item-type: HOPPER
+            name: "<aqua>65 Hopper Limit</aqua>"
+            lore:
+                - "<gray>Cost:</gray> <dark_green>$135,000</dark_green>"
+                - " "
+                - "<gray>Click here to upgrade your island hopper limit to 65.</gray>"
+        purchased-item:
+            item-type: HOPPER
+            name: "<aqua>65 Hopper Limit</aqua>"
+            lore:
+                - "<red>You already have this upgrade.</red>"
+        slot: 14
+        # This is the additional amount to set for the player's island.
+        # So 25 + 40 = 65 (base_amount + offset_amount = total_amount)
+        offset-amount: 40
+        # The cost to buy the additional offset.
+        price: 135000
+    -   purchasable-item:
+            item-type: HOPPER
+            name: "<aqua>75 Hopper Limit</aqua>"
+            lore:
+                - "<gray>Cost:</gray> <dark_green>$150,000</dark_green>"
+                - " "
+                - "<gray>Click here to upgrade your island hopper limit to 75.</gray>"
+        purchased-item:
+            item-type: HOPPER
+            name: "<aqua>75 Hopper Limit</aqua>"
+            lore:
+                - "<red>You already have this upgrade.</red>"
+        slot: 15
+        # This is the additional amount to set for the player's island.
+        # So 25 + 50 = 75 (base_amount + offset_amount = total_amount)
+        offset-amount: 50
+        # The cost to buy the additional offset.
+        price: 150000
