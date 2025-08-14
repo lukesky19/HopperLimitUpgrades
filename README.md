@@ -3,10 +3,7 @@
 * HopperLimitUpgrades allows the upgrading of hopper limits for BentoBox Islands and the Limits addon.
 ## Features
 * Allows the purchasing of additional offsets for hopper limits through the BentoBox limits addon.
-## Required Dependencies
-* SkyLib
-* Vault
-## Optional Dependencies
+## Dependencies
 * BentoBox
 * Limits Addon
 * SkyLib
