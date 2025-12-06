@@ -21,10 +21,10 @@ import com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades;
 import com.github.lukesky19.hopperlimitupgrades.config.Locale;
 import com.github.lukesky19.hopperlimitupgrades.gui.UpgradeGUI;
 import com.github.lukesky19.hopperlimitupgrades.manager.GUIConfigManager;
-import com.github.lukesky19.hopperlimitupgrades.manager.GUIManager;
 import com.github.lukesky19.hopperlimitupgrades.manager.LimitManager;
 import com.github.lukesky19.hopperlimitupgrades.manager.LocaleManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.gui.impl.UUIDGUIManager;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -50,7 +50,7 @@ public class UpgradeCommand {
     private final @NotNull ComponentLogger logger;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull GUIManager guiManager;
+    private final @NotNull UUIDGUIManager guiManager;
     private final @NotNull LimitManager limitManager;
 
     /**
@@ -58,14 +58,14 @@ public class UpgradeCommand {
      * @param hopperLimitUpgrades A {@link HopperLimitUpgrades} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager A {@link GUIManager} instance.
+     * @param guiManager A {@link UUIDGUIManager} instance.
      * @param limitManager A {@link LimitManager} instance.
      */
     public UpgradeCommand(
             @NotNull HopperLimitUpgrades hopperLimitUpgrades,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager,
+            @NotNull UUIDGUIManager guiManager,
             @NotNull LimitManager limitManager) {
         this.hopperLimitUpgrades = hopperLimitUpgrades;
         this.logger = hopperLimitUpgrades.getComponentLogger();
@@ -86,39 +86,39 @@ public class UpgradeCommand {
         builder.executes(ctx -> {
             @NotNull Locale locale = localeManager.getLocale();
             if(!(ctx.getSource().getSender() instanceof Player player)) {
-                logger.info(AdventureUtil.serialize(locale.playerOnly()));
+                logger.info(AdventureUtil.deserialize(locale.playerOnly()));
                 return 0;
             }
             UUID uuid = player.getUniqueId();
 
             Optional<Island> optionalIsland = BentoBox.getInstance().getIslandsManager().getIslandAt(player.getLocation());
             if(optionalIsland.isEmpty()) {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.notOnIsland()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.notOnIsland()));
                 return 0;
             }
             Island island = optionalIsland.get();
 
             if(!island.getMemberSet().contains(uuid)) {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandMemberOrOwnerOnly()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandMemberOrOwnerOnly()));
                 return 0;
             }
 
             UpgradeGUI gui = new UpgradeGUI(hopperLimitUpgrades, guiConfigManager, guiManager, localeManager, player, island);
             boolean createResult = gui.create();
             if(!createResult) {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 return 0;
             }
 
             boolean updateResult = gui.update();
             if(!updateResult) {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 return 0;
             }
 
             boolean openResult = gui.open();
             if(!openResult) {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 return 0;
             }
 
@@ -132,7 +132,7 @@ public class UpgradeCommand {
                 CommandSender sender = ctx.getSource().getSender();
 
                 for (String msg : locale.help()) {
-                    sender.sendMessage(AdventureUtil.serialize(msg));
+                    sender.sendMessage(AdventureUtil.deserialize(msg));
                 }
                 
                 return 1;
@@ -158,9 +158,9 @@ public class UpgradeCommand {
                 hopperLimitUpgrades.reload();
 
                 if(sender instanceof Player player) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.reload()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.reload()));
                 } else {
-                    logger.info(AdventureUtil.serialize(locale.reload()));
+                    logger.info(AdventureUtil.deserialize(locale.reload()));
                 }
 
                 return 1;

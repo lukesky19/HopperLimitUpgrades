@@ -18,9 +18,10 @@
 package com.github.lukesky19.hopperlimitupgrades;
 
 import com.github.lukesky19.hopperlimitupgrades.command.UpgradeCommand;
-import com.github.lukesky19.hopperlimitupgrades.listener.InventoryListener;
 import com.github.lukesky19.hopperlimitupgrades.manager.*;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.gui.impl.UUIDGUIListener;
+import com.github.lukesky19.skylib.api.gui.impl.UUIDGUIManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
@@ -43,7 +44,7 @@ public final class HopperLimitUpgrades extends JavaPlugin {
     private SettingsManager settingsManager;
     private LocaleManager localeManager;
     private GUIConfigManager guiConfigManager;
-    private GUIManager guiManager;
+    private UUIDGUIManager guiManager;
     private Economy economy;
     private Limits limitsAddon;
 
@@ -81,11 +82,11 @@ public final class HopperLimitUpgrades extends JavaPlugin {
         settingsManager = new SettingsManager(this);
         localeManager = new LocaleManager(this, settingsManager);
         guiConfigManager = new GUIConfigManager(this);
-        guiManager = new GUIManager(this);
+        guiManager = new UUIDGUIManager();
         LimitManager limitManager = new LimitManager(this, localeManager);
         UpgradeCommand upgradeCommand = new UpgradeCommand(this, localeManager, guiConfigManager, guiManager, limitManager);
 
-        this.getServer().getPluginManager().registerEvents(new InventoryListener(guiManager), this);
+        this.getServer().getPluginManager().registerEvents(new UUIDGUIListener(guiManager), this);
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands ->
                 commands.registrar().register(upgradeCommand.createCommand(),
@@ -117,7 +118,7 @@ public final class HopperLimitUpgrades extends JavaPlugin {
     private boolean setupLevelAddon() {
         Optional<Addon> optionalAddon = BentoBox.getInstance().getAddonsManager().getAddonByName("Limits");
         if(optionalAddon.isEmpty()) {
-            this.getComponentLogger().error(AdventureUtil.serialize("<red>HopperLimitUpgrades has been disabled due to no Limits addon dependency found!</red>"));
+            this.getComponentLogger().error(AdventureUtil.deserialize("<red>HopperLimitUpgrades has been disabled due to no Limits addon dependency found!</red>"));
 
             this.getServer().getPluginManager().disablePlugin(this);
 
@@ -159,12 +160,12 @@ public final class HopperLimitUpgrades extends JavaPlugin {
             String[] splitVersion = version.split("\\.");
             int second = Integer.parseInt(splitVersion[1]);
 
-            if(second >= 3) {
+            if(second >= 4) {
                 return true;
             }
         }
 
-        this.getComponentLogger().error(AdventureUtil.serialize("SkyLib Version 1.3.0.0 or newer is required to run this plugin."));
+        this.getComponentLogger().error(AdventureUtil.deserialize("SkyLib Version 1.4.0.0 or newer is required to run this plugin."));
         this.getServer().getPluginManager().disablePlugin(this);
         return false;
     }

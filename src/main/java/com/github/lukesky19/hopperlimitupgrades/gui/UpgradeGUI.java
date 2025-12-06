@@ -21,12 +21,12 @@ import com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades;
 import com.github.lukesky19.hopperlimitupgrades.config.GUIConfig;
 import com.github.lukesky19.hopperlimitupgrades.config.Locale;
 import com.github.lukesky19.hopperlimitupgrades.manager.GUIConfigManager;
-import com.github.lukesky19.hopperlimitupgrades.manager.GUIManager;
 import com.github.lukesky19.hopperlimitupgrades.manager.LocaleManager;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.abstracts.ChestGUI;
+import com.github.lukesky19.skylib.api.gui.impl.UUIDGUIManager;
+import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -51,7 +51,7 @@ import java.util.*;
 /**
  * Creates the GUI to upgrade an island's hopper limit.
  */
-public class UpgradeGUI extends ChestGUI {
+public class UpgradeGUI extends ChestGUI<UUID> {
     private final @NotNull HopperLimitUpgrades hopperLimitUpgrades;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull Island island;
@@ -61,7 +61,7 @@ public class UpgradeGUI extends ChestGUI {
      * Constructor
      * @param hopperLimitUpgrades A {@link HopperLimitUpgrades} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param guiManager A {@link GUIManager} instance.
+     * @param guiManager A {@link UUIDGUIManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param player The {@link Player} viewing the GUI.
      * @param island The {@link Island} to apply hopper limit offsets to.
@@ -69,11 +69,11 @@ public class UpgradeGUI extends ChestGUI {
     public UpgradeGUI(
             @NotNull HopperLimitUpgrades hopperLimitUpgrades,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull GUIManager guiManager,
+            @NotNull UUIDGUIManager guiManager,
             @NotNull LocaleManager localeManager,
             @NotNull Player player,
             @NotNull Island island) {
-        super(hopperLimitUpgrades, guiManager, player);
+        super(hopperLimitUpgrades, guiManager, player.getUniqueId(), player);
 
         this.hopperLimitUpgrades = hopperLimitUpgrades;
         this.localeManager = localeManager;
@@ -88,13 +88,13 @@ public class UpgradeGUI extends ChestGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the upgrade GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the upgrade GUI due to invalid gui configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the upgrade GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the upgrade GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -112,13 +112,13 @@ public class UpgradeGUI extends ChestGUI {
         clearButtons();
 
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add buttons to the GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
             return false;
         }
 
@@ -201,7 +201,7 @@ public class UpgradeGUI extends ChestGUI {
 
         guiConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the upgrade GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the upgrade GUI due to an invalid slot."));
                 return;
             }
 
@@ -227,7 +227,7 @@ public class UpgradeGUI extends ChestGUI {
 
         // Check if the slot is not configured and send a warning.
         if(guiConfig.exit().slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to add a exit button due to a slot not being configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to add a exit button due to a slot not being configured."));
             return;
         }
 
@@ -263,17 +263,17 @@ public class UpgradeGUI extends ChestGUI {
 
         for(GUIConfig.UpgradeButtonConfig upgradeButtonConfig : guiConfig.upgradeButtons()) {
             if(upgradeButtonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a upgrade button to the upgrade GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a upgrade button to the upgrade GUI due to an invalid slot."));
                 continue;
             }
 
             if(upgradeButtonConfig.price() == null || upgradeButtonConfig.price() <= 0) {
-                logger.warn(AdventureUtil.serialize("Unable to add a upgrade button to the upgrade GUI due to an invalid price."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a upgrade button to the upgrade GUI due to an invalid price."));
                 continue;
             }
 
             if(upgradeButtonConfig.offsetAmount() == null || upgradeButtonConfig.offsetAmount() <= 0) {
-                logger.warn(AdventureUtil.serialize("Unable to add a upgrade button to the upgrade GUI due to an invalid offset amount."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a upgrade button to the upgrade GUI due to an invalid offset amount."));
                 continue;
             }
 
@@ -296,11 +296,11 @@ public class UpgradeGUI extends ChestGUI {
                             int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER) + islandBlockCount.getBlockLimitOffset(Material.HOPPER);
                             List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
 
-                            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperLimitUpgraded(), placeholders));
+                            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperLimitUpgraded(), placeholders));
 
                             update();
                         } else {
-                            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.insufficientFunds()));
+                            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.insufficientFunds()));
                         }
                     });
 

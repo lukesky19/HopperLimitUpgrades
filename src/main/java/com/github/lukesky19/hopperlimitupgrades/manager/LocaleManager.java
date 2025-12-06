@@ -99,11 +99,11 @@ public class LocaleManager {
 
         Settings settings = settingsManager.getSettings();
         if(settings == null) {
-            logger.error(AdventureUtil.serialize("<red>Failed to load plugin's locale due to plugin settings being null.</red>"));
+            logger.error(AdventureUtil.deserialize("<red>Failed to load plugin's locale due to plugin settings being null.</red>"));
             return;
         }
         if(settings.locale() == null) {
-            logger.error(AdventureUtil.serialize("<red>Failed to load plugin's locale to use in settings.yml is null.</red>"));
+            logger.error(AdventureUtil.deserialize("<red>Failed to load plugin's locale to use in settings.yml is null.</red>"));
             return;
         }
 
@@ -151,7 +151,7 @@ public class LocaleManager {
                 || locale.playerHopperLimitOffset() == null
                 || locale.amountMustBePositive() == null
                 || locale.islandNotFound() == null) {
-            logger.warn(AdventureUtil.serialize("The plugin's config version or one of the plugin's locale messages is null. Double-check your configuration. The default locale will be used."));
+            logger.warn(AdventureUtil.deserialize("The plugin's config version or one of the plugin's locale messages is null. Double-check your configuration. The default locale will be used."));
             locale = null;
         }
     }

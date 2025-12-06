@@ -70,7 +70,7 @@ public class GUIConfigManager {
         try {
             guiConfig = configurationLoader.load().get(GUIConfig.class);
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.serialize("Failed to load upgrade GUI config. Error:" + configurateException.getMessage()));
+            logger.error(AdventureUtil.deserialize("Failed to load upgrade GUI config. Error:" + configurateException.getMessage()));
         }
     }
 

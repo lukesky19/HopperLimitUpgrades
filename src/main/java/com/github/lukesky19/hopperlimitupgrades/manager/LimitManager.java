@@ -74,13 +74,13 @@ public class LimitManager {
         placeholders.add(Placeholder.parsed("player_name", targetPlayer.getName()));
 
         if(amount < 0) {
-            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.amountMustBePositive()));
+            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.amountMustBePositive()));
             return false;
         }
 
         @Nullable Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
-            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
         }
         IslandBlockCount islandBlockCount = blockLimitListener.getIsland(island);
@@ -90,8 +90,8 @@ public class LimitManager {
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
 
-        targetPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
-        sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
+        targetPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
+        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
 
         return true;
     }
@@ -112,13 +112,13 @@ public class LimitManager {
         placeholders.add(Placeholder.parsed("player_name", targetPlayer.getName()));
 
         if(amount < 0) {
-            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.amountMustBePositive()));
+            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.amountMustBePositive()));
             return false;
         }
 
         @Nullable Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
-            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
         }
         IslandBlockCount islandBlockCount = blockLimitListener.getIsland(island);
@@ -131,8 +131,8 @@ public class LimitManager {
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
 
-        targetPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
-        sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
+        targetPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
+        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
 
         return true;
     }
@@ -153,13 +153,13 @@ public class LimitManager {
         placeholders.add(Placeholder.parsed("player_name", targetPlayer.getName()));
 
         if(amount < 0) {
-            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.amountMustBePositive()));
+            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.amountMustBePositive()));
             return false;
         }
 
         @Nullable Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
-            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
         }
         IslandBlockCount islandBlockCount = blockLimitListener.getIsland(island);
@@ -173,8 +173,8 @@ public class LimitManager {
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
 
-        targetPlayer.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
-        sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
+        targetPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
+        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
 
         return true;
     }
@@ -195,7 +195,7 @@ public class LimitManager {
 
         @Nullable Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
-            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
         }
 
@@ -204,7 +204,7 @@ public class LimitManager {
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(count)));
 
-        sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.playerHopperLimitOffset(), placeholders));
+        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.playerHopperLimitOffset(), placeholders));
 
         return true;
     }
