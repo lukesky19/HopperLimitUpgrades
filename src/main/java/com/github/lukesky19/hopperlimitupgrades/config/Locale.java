@@ -18,13 +18,13 @@
 package com.github.lukesky19.hopperlimitupgrades.config;
 
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
 /**
  * The plugin's locale configuration.
- * @param configVersion The config version of the locale.
+ * @param version The config version of the locale.
  * @param prefix The plugin's prefix.
  * @param reload The message sent when the plugin is reloaded.
  * @param help The plugin's help messages.
@@ -42,10 +42,10 @@ import java.util.List;
  */
 @ConfigSerializable
 public record Locale(
-        String configVersion,
+        int version,
         String prefix,
         String reload,
-        @NotNull List<String> help,
+        @NonNull List<String> help,
         String playerOnly,
         String notOnIsland,
         String islandMemberOrOwnerOnly,

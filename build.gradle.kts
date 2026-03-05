@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.github.lukesky19"
-version = "1.1.0.0"
+version = "1.1.1.0"
 
 repositories {
     mavenCentral()
@@ -32,8 +32,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
-    compileOnly("com.github.lukesky19:SkyLib:1.4.0.0")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("com.github.lukesky19:SkyLib:1.5.0.0")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
 
     // Hooks

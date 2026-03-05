@@ -21,14 +21,14 @@ import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 /**
  * This record contains the configuration for the upgrade GUI.
- * @param configVersion The config version.
+ * @param version The config version.
  * @param guiName The name to use in the GUI.
  * @param guiType The {@link GUIType}.
  * @param filler The {@link ItemStackConfig} to fill the GUI with.
@@ -40,15 +40,15 @@ import java.util.List;
  */
 @ConfigSerializable
 public record GUIConfig(
-        @Nullable String configVersion,
+        int version,
         @Nullable String guiName,
         @Nullable GUIType guiType,
-        @NotNull ItemStackConfig filler,
-        @NotNull ButtonConfig nextPage,
-        @NotNull ButtonConfig prevPage,
-        @NotNull ButtonConfig exit,
-        @NotNull List<ButtonConfig> dummyButtons,
-        @NotNull List<UpgradeButtonConfig> upgradeButtons) {
+        @NonNull ItemStackConfig filler,
+        @NonNull ButtonConfig nextPage,
+        @NonNull ButtonConfig prevPage,
+        @NonNull ButtonConfig exit,
+        @NonNull List<ButtonConfig> dummyButtons,
+        @NonNull List<UpgradeButtonConfig> upgradeButtons) {
     /**
      * This record contains the configuration for a single button to display in a GUI.
      * @param item The {@link ItemStackConfig} for the {@link ItemStack}.
@@ -56,7 +56,7 @@ public record GUIConfig(
      */
     @ConfigSerializable
     public record ButtonConfig(
-            @NotNull ItemStackConfig item,
+            @NonNull ItemStackConfig item,
             @Nullable Integer slot) {}
 
     /**
@@ -69,8 +69,8 @@ public record GUIConfig(
      */
     @ConfigSerializable
     public record UpgradeButtonConfig(
-            @NotNull ItemStackConfig purchasableItem,
-            @NotNull ItemStackConfig purchasedItem,
+            @NonNull ItemStackConfig purchasableItem,
+            @NonNull ItemStackConfig purchasedItem,
             @Nullable Integer slot,
             @Nullable Integer offsetAmount,
             @Nullable Double price) {}

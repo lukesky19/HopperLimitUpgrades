@@ -39,22 +39,25 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.limits.Limits;
 import world.bentobox.limits.listeners.BlockLimitsListener;
 import world.bentobox.limits.objects.IslandBlockCount;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Creates the GUI to upgrade an island's hopper limit.
  */
 public class UpgradeGUI extends ChestGUI<UUID> {
-    private final @NotNull HopperLimitUpgrades hopperLimitUpgrades;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull Island island;
+    private final @NonNull HopperLimitUpgrades hopperLimitUpgrades;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull Island island;
     private final @Nullable GUIConfig guiConfig;
 
     /**
@@ -67,19 +70,19 @@ public class UpgradeGUI extends ChestGUI<UUID> {
      * @param island The {@link Island} to apply hopper limit offsets to.
      */
     public UpgradeGUI(
-            @NotNull HopperLimitUpgrades hopperLimitUpgrades,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull UUIDGUIManager guiManager,
-            @NotNull LocaleManager localeManager,
-            @NotNull Player player,
-            @NotNull Island island) {
+            @NonNull HopperLimitUpgrades hopperLimitUpgrades,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull UUIDGUIManager guiManager,
+            @NonNull LocaleManager localeManager,
+            @NonNull Player player,
+            @NonNull Island island) {
         super(hopperLimitUpgrades, guiManager, player.getUniqueId(), player);
 
         this.hopperLimitUpgrades = hopperLimitUpgrades;
         this.localeManager = localeManager;
 
         this.island = island;
-        this.guiConfig = guiConfigManager.getGuiConfig();
+        this.guiConfig = guiConfigManager.getConfiguration();
     }
 
     /**
@@ -137,7 +140,7 @@ public class UpgradeGUI extends ChestGUI<UUID> {
      * @param inventoryCloseEvent An {@link InventoryCloseEvent}
      */
     @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
+    public void handleClose(@NonNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
         guiManager.removeOpenGUI(uuid);
@@ -148,28 +151,28 @@ public class UpgradeGUI extends ChestGUI<UUID> {
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleBottomDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * This method does nothing.
      * @param inventoryDragEvent An {@link InventoryDragEvent}
      */
     @Override
-    public void handleGlobalDrag(@NotNull InventoryDragEvent inventoryDragEvent) {}
+    public void handleGlobalDrag(@NonNull InventoryDragEvent inventoryDragEvent) {}
 
     /**
      * This method does nothing.
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleBottomClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleBottomClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * This method does nothing.
      * @param inventoryClickEvent An {@link InventoryClickEvent}
      */
     @Override
-    public void handleGlobalClick(@NotNull InventoryClickEvent inventoryClickEvent) {}
+    public void handleGlobalClick(@NonNull InventoryClickEvent inventoryClickEvent) {}
 
     /**
      * Create the filler buttons for the GUI.
@@ -180,9 +183,9 @@ public class UpgradeGUI extends ChestGUI<UUID> {
 
         ItemStackConfig fillerConfig = guiConfig.filler();
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(fillerConfig, player, null, List.of());
+        itemStackBuilder.fromItemStackConfig(fillerConfig, player, List.of());
 
-        Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+        Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder builder = new GUIButton.Builder();
             builder.setItemStack(itemStack);
@@ -207,8 +210,8 @@ public class UpgradeGUI extends ChestGUI<UUID> {
 
             ItemStackConfig itemStackConfig = buttonConfig.item();
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
-            Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
+            Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
             optionalItemStack.ifPresent(itemStack -> {
                 GUIButton.Builder builder = new GUIButton.Builder();
 
@@ -236,7 +239,7 @@ public class UpgradeGUI extends ChestGUI<UUID> {
 
         // Create the ItemStackBuilder and pass the ItemStackConfig.
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(itemConfig, player, null, List.of());
+        itemStackBuilder.fromItemStackConfig(itemConfig, player, List.of());
 
         // If an ItemStack was created, create the GUIButton and add it to the GUI.
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
@@ -253,7 +256,7 @@ public class UpgradeGUI extends ChestGUI<UUID> {
      * Create the upgrade buttons for the GUI.
      */
     private void createUpgrades() {
-        @NotNull Locale locale = localeManager.getLocale();
+        Locale locale = localeManager.getConfiguration();
         if(guiConfig == null) return;
         Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
         BlockLimitsListener blockLimitListener = limitsAddon.getBlockLimitListener();
@@ -280,8 +283,8 @@ public class UpgradeGUI extends ChestGUI<UUID> {
             if(hopperLimitOffset < upgradeButtonConfig.offsetAmount()) {
                 ItemStackConfig itemStackConfig = upgradeButtonConfig.purchasableItem();
                 ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-                itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
-                Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+                itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
+                Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
                 if(optionalItemStack.isPresent()) {
                     GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
                     upgradeBuilder.setItemStack(optionalItemStack.get());
@@ -309,8 +312,8 @@ public class UpgradeGUI extends ChestGUI<UUID> {
             } else {
                 ItemStackConfig itemStackConfig = upgradeButtonConfig.purchasedItem();
                 ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-                itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
-                Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+                itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
+                Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
                 if(optionalItemStack.isPresent()) {
                     GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
                     upgradeBuilder.setItemStack(optionalItemStack.get());

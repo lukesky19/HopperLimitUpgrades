@@ -20,13 +20,9 @@ package com.github.lukesky19.hopperlimitupgrades.manager;
 import com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades;
 import com.github.lukesky19.hopperlimitupgrades.config.Settings;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
-import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
-import com.github.lukesky19.skylib.libs.configurate.serialize.SerializationException;
-import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -34,49 +30,40 @@ import java.nio.file.Path;
 /**
  * This class manages everything related to handling the plugin's settings.
  */
-public class SettingsManager {
-    private final @NotNull HopperLimitUpgrades hopperLimitUpgrades;
-    private @Nullable Settings settings;
-
+public class SettingsManager extends SimpleConfigManager<Settings> {
     /**
      * Constructor
      * @param hopperLimitUpgrades A {@link HopperLimitUpgrades} instance.
      */
-    public SettingsManager(
-            @NotNull HopperLimitUpgrades hopperLimitUpgrades) {
-        this.hopperLimitUpgrades = hopperLimitUpgrades;
+    public SettingsManager(@NonNull HopperLimitUpgrades hopperLimitUpgrades) {
+        super(hopperLimitUpgrades, Path.of(hopperLimitUpgrades.getDataFolder() + File.separator + "settings.yml"), Settings.class);
     }
 
-    /**
-     * Get the plugin's {@link Settings}.
-     * @return The plugin's {@link Settings} or null.
-     */
-    public @Nullable Settings getSettings() {
+    @Override
+    public void saveBundledConfig() {
+        plugin.saveResource("settings.yml", false);
+    }
+
+    @Override
+    public @Nullable Settings migrateConfiguration(@NonNull Settings settings) {
+        if(settings.version() == 0) {
+            return new Settings(1, settings.locale());
+        }
+
         return settings;
     }
 
-    /**
-     * A method to reload the plugin's settings config.
-     */
-    public void reload() {
-        ComponentLogger logger = hopperLimitUpgrades.getComponentLogger();
-        settings = null;
+    @Override
+    public boolean validateConfiguration(@Nullable Settings configuration) {
+        if(configuration == null) return false;
 
-        Path path = Path.of(hopperLimitUpgrades.getDataFolder() + File.separator + "settings.yml");
-        if(!path.toFile().exists()) {
-            hopperLimitUpgrades.saveResource("settings.yml", false);
+        if(configuration.locale() == null) {
+            logger.error(AdventureUtil.deserialize("Your settings.yml is missing a defined locale."));
+            logger.info(AdventureUtil.deserialize("You can regenerate your settings file by deleting it or defining the locale to use to resolve the issue."));
+
+            return false;
         }
 
-        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
-        try {
-            settings = loader.load().get(Settings.class);
-        } catch (SerializationException e) {
-            throw new RuntimeException(e);
-        } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("<red>Failed to load plugin settings.</red>"));
-            if(configurateException.getMessage() != null) {
-                logger.error(AdventureUtil.deserialize(configurateException.getMessage()));
-            }
-        }
+        return true;
     }
 }

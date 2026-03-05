@@ -20,6 +20,7 @@ package com.github.lukesky19.hopperlimitupgrades;
 import com.github.lukesky19.hopperlimitupgrades.command.UpgradeCommand;
 import com.github.lukesky19.hopperlimitupgrades.manager.*;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.common.abstracts.SkyPlugin;
 import com.github.lukesky19.skylib.api.gui.impl.UUIDGUIListener;
 import com.github.lukesky19.skylib.api.gui.impl.UUIDGUIManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -28,8 +29,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.limits.Limits;
@@ -40,7 +40,7 @@ import java.util.Optional;
 /**
  * The plugin's main class.
  */
-public final class HopperLimitUpgrades extends JavaPlugin {
+public final class HopperLimitUpgrades extends SkyPlugin {
     private SettingsManager settingsManager;
     private LocaleManager localeManager;
     private GUIConfigManager guiConfigManager;
@@ -52,7 +52,7 @@ public final class HopperLimitUpgrades extends JavaPlugin {
      * Get the server's {@link Economy}.
      * @return The {@link Economy}.
      */
-    public @NotNull Economy getEconomy() {
+    public @NonNull Economy getEconomy() {
         return economy;
     }
 
@@ -60,7 +60,7 @@ public final class HopperLimitUpgrades extends JavaPlugin {
      * Get the {@link Limits} addon.
      * @return The {@link Limits} addon.
      */
-    public @NotNull Limits getLimitsAddon() {
+    public @NonNull Limits getLimitsAddon() {
         return limitsAddon;
     }
 
@@ -106,10 +106,11 @@ public final class HopperLimitUpgrades extends JavaPlugin {
     /**
      * The plugin's main reload method.
      */
+    @Override
     public void reload() {
-        settingsManager.reload();
-        localeManager.reload();
-        guiConfigManager.reload();
+        settingsManager.loadConfiguration();
+        localeManager.loadConfiguration();
+        guiConfigManager.loadConfiguration();
     }
 
     /**
@@ -160,12 +161,12 @@ public final class HopperLimitUpgrades extends JavaPlugin {
             String[] splitVersion = version.split("\\.");
             int second = Integer.parseInt(splitVersion[1]);
 
-            if(second >= 4) {
+            if(second >= 5) {
                 return true;
             }
         }
 
-        this.getComponentLogger().error(AdventureUtil.deserialize("SkyLib Version 1.4.0.0 or newer is required to run this plugin."));
+        this.getComponentLogger().error(AdventureUtil.deserialize("SkyLib Version 1.5.0.0 or newer is required to run this plugin."));
         this.getServer().getPluginManager().disablePlugin(this);
         return false;
     }

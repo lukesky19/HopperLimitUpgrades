@@ -21,12 +21,9 @@ import com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades;
 import com.github.lukesky19.hopperlimitupgrades.config.Locale;
 import com.github.lukesky19.hopperlimitupgrades.config.Settings;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
-import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
-import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -35,11 +32,10 @@ import java.util.List;
 /**
  * This class loads the plugin's locale configuration.
  */
-public class LocaleManager {
-    private final @NotNull HopperLimitUpgrades hopperLimitUpgrades;
-    private final @NotNull SettingsManager settingsManager;
-    private final @NotNull Locale DEFAULT_LOCALE = new Locale(
-            "1.0.0.0",
+public class LocaleManager extends SimpleConfigManager<Locale> {
+    private final @NonNull SettingsManager settingsManager;
+    private final @NonNull Locale DEFAULT_LOCALE = new Locale(
+            1,
             "<gold><bold>HopperLimitUpgrades</bold></gold><gray> ▪ </gray>",
             "<dark_green>The plugin has been reloaded.</dark_green>",
             List.of("<aqua>HopperLimitUpgrades is developed by <white><bold>lukeskywlker19</bold></white>.</aqua>",
@@ -65,7 +61,6 @@ public class LocaleManager {
             "<dark_green><player_name></aqua>'s hopper limit offset is <aqua><amount></aqua>.</dark_green>",
             "<red>The hopper limit amount must be positive.</red>",
             "<red>No island was found for player <aqua><player_name></aqua>.</red>");
-    private @Nullable Locale locale;
 
     /**
      * Constructor
@@ -73,31 +68,26 @@ public class LocaleManager {
      * @param settingsManager A {@link SettingsManager} instance.
      */
     public LocaleManager(
-            @NotNull HopperLimitUpgrades hopperLimitUpgrades,
-            @NotNull SettingsManager settingsManager)  {
-        this.hopperLimitUpgrades = hopperLimitUpgrades;
+            @NonNull HopperLimitUpgrades hopperLimitUpgrades,
+            @NonNull SettingsManager settingsManager)  {
+        super(hopperLimitUpgrades, Locale.class);
+
         this.settingsManager = settingsManager;
     }
 
     /**
-     * Gets the plugin's {@link Locale} or the default locale if it failed to load.
-     * @return The plugin's {@link Locale} or the default locale if it failed to load.
+     * Gets the plugin's locale if not null or the default locale otherwise.
+     * @return The plugin's locale if not null or the default locale otherwise.
      */
-    public @NotNull Locale getLocale() {
-        if(locale == null) return DEFAULT_LOCALE;
-        return locale;
+    @Override
+    public @NonNull Locale getConfiguration() {
+        if(configuration == null) return DEFAULT_LOCALE;
+        return configuration;
     }
 
-    /**
-     * Reloads the plugin's locale.
-     */
-    public void reload() {
-        ComponentLogger logger = hopperLimitUpgrades.getComponentLogger();
-        locale = null;
-
-        copyDefaultLocales();
-
-        Settings settings = settingsManager.getSettings();
+    @Override
+    public void loadConfiguration() {
+        Settings settings = settingsManager.getConfiguration();
         if(settings == null) {
             logger.error(AdventureUtil.deserialize("<red>Failed to load plugin's locale due to plugin settings being null.</red>"));
             return;
@@ -108,37 +98,49 @@ public class LocaleManager {
         }
 
         String localeString = settings.locale();
-        Path path = Path.of(hopperLimitUpgrades.getDataFolder() + File.separator + "locale" + File.separator + (localeString + ".yml"));
+        Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + (localeString + ".yml"));
+        setConfigurationPath(path);
 
-        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
-        try {
-            locale = loader.load().get(Locale.class);
-        } catch (ConfigurateException exception) {
-            throw new RuntimeException(exception);
-        }
-
-        validateLocale();
+        super.loadConfiguration();
     }
 
-    /**
-     * Copies the default locale files that come bundled with the plugin, if they do not exist at least.
-     */
-    private void copyDefaultLocales() {
-        Path path = Path.of(hopperLimitUpgrades.getDataFolder() + File.separator + "locale" + File.separator + "en_US.yml");
+    @Override
+    protected void saveBundledConfig() {
+        Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + "en_US.yml");
         if (!path.toFile().exists()) {
-            hopperLimitUpgrades.saveResource("locale" + File.separator + "en_US.yml", false);
+            plugin.saveResource("locale" + File.separator + "en_US.yml", false);
         }
     }
 
-    /**
-     * Checks if the locale configuration has any null-values.
-     */
-    private void validateLocale() {
-        ComponentLogger logger = hopperLimitUpgrades.getComponentLogger();
-        if(locale == null) return;
+    @Override
+    public @Nullable Locale migrateConfiguration(@NonNull Locale locale) {
+        if(locale.version() == 0) {
+            return new Locale(
+                    1,
+                    locale.prefix(),
+                    locale.reload(),
+                    locale.help(),
+                    locale.playerOnly(),
+                    locale.notOnIsland(),
+                    locale.islandMemberOrOwnerOnly(),
+                    locale.guiOpenError(),
+                    locale.insufficientFunds(),
+                    locale.hopperLimitUpgraded(),
+                    locale.hopperLimitUpdated(),
+                    locale.playerHopperLimitUpdated(),
+                    locale.playerHopperLimitOffset(),
+                    locale.amountMustBePositive(),
+                    locale.islandNotFound());
+        }
 
-        if(locale.configVersion() == null
-                || locale.prefix() == null
+        return locale;
+    }
+
+    @Override
+    public boolean validateConfiguration(@Nullable Locale locale) {
+        if(locale == null) return false;
+
+        if(locale.prefix() == null
                 || locale.reload() == null
                 || locale.playerOnly() == null
                 || locale.notOnIsland() == null
@@ -152,7 +154,9 @@ public class LocaleManager {
                 || locale.amountMustBePositive() == null
                 || locale.islandNotFound() == null) {
             logger.warn(AdventureUtil.deserialize("The plugin's config version or one of the plugin's locale messages is null. Double-check your configuration. The default locale will be used."));
-            locale = null;
+            return false;
         }
+
+        return true;
     }
 }

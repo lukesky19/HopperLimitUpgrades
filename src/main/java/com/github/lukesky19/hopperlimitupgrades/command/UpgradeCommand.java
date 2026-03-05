@@ -35,7 +35,7 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 
@@ -46,12 +46,12 @@ import java.util.UUID;
  * This class is used to create the /hopperlimitupgrades command.
  */
 public class UpgradeCommand {
-    private final @NotNull HopperLimitUpgrades hopperLimitUpgrades;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull UUIDGUIManager guiManager;
-    private final @NotNull LimitManager limitManager;
+    private final @NonNull HopperLimitUpgrades hopperLimitUpgrades;
+    private final @NonNull ComponentLogger logger;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull GUIConfigManager guiConfigManager;
+    private final @NonNull UUIDGUIManager guiManager;
+    private final @NonNull LimitManager limitManager;
 
     /**
      * Constructor
@@ -62,11 +62,11 @@ public class UpgradeCommand {
      * @param limitManager A {@link LimitManager} instance.
      */
     public UpgradeCommand(
-            @NotNull HopperLimitUpgrades hopperLimitUpgrades,
-            @NotNull LocaleManager localeManager,
-            @NotNull GUIConfigManager guiConfigManager,
-            @NotNull UUIDGUIManager guiManager,
-            @NotNull LimitManager limitManager) {
+            @NonNull HopperLimitUpgrades hopperLimitUpgrades,
+            @NonNull LocaleManager localeManager,
+            @NonNull GUIConfigManager guiConfigManager,
+            @NonNull UUIDGUIManager guiManager,
+            @NonNull LimitManager limitManager) {
         this.hopperLimitUpgrades = hopperLimitUpgrades;
         this.logger = hopperLimitUpgrades.getComponentLogger();
         this.localeManager = localeManager;
@@ -79,12 +79,12 @@ public class UpgradeCommand {
      * Create the {@link LiteralCommandNode} of type {@link CommandSourceStack} for the /hopperlimitupgrades command.
      * @return A {@link LiteralCommandNode} of type {@link CommandSourceStack} for the /hopperlimitupgrades command.
      */
-    public @NotNull LiteralCommandNode<CommandSourceStack> createCommand() {
+    public @NonNull LiteralCommandNode<CommandSourceStack> createCommand() {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("hopperlimitupgrades")
             .requires(ctx -> ctx.getSender().hasPermission("hopperlimitupgrades.commands.hopperlimitupgrades"));
 
         builder.executes(ctx -> {
-            @NotNull Locale locale = localeManager.getLocale();
+            Locale locale = localeManager.getConfiguration();
             if(!(ctx.getSource().getSender() instanceof Player player)) {
                 logger.info(AdventureUtil.deserialize(locale.playerOnly()));
                 return 0;
@@ -128,7 +128,7 @@ public class UpgradeCommand {
         builder.then(Commands.literal("help")
             .requires(ctx -> ctx.getSender().hasPermission("hopperlimitupgrades.commands.hopperlimitupgrades.help"))
             .executes(ctx -> {
-                Locale locale = localeManager.getLocale();
+                Locale locale = localeManager.getConfiguration();
                 CommandSender sender = ctx.getSource().getSender();
 
                 for (String msg : locale.help()) {
@@ -152,7 +152,7 @@ public class UpgradeCommand {
         builder.then(Commands.literal("reload")
             .requires(ctx -> ctx.getSender().hasPermission("hopperlimitupgrades.commands.hopperlimitupgrades.reload"))
             .executes(ctx -> {
-                Locale locale = localeManager.getLocale();
+                Locale locale = localeManager.getConfiguration();
                 CommandSender sender = ctx.getSource().getSender();
 
                 hopperLimitUpgrades.reload();

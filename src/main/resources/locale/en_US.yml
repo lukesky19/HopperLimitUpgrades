@@ -1,4 +1,4 @@
-config-version: 1.0.0.0
+version: 1
 prefix: "<gold><bold>HopperLimitUpgrades</bold></gold><gray> ▪ </gray>"
 reload: "<dark_green>The plugin has been reloaded.</dark_green>"
 help:

@@ -25,8 +25,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
 import world.bentobox.bentobox.managers.IslandsManager;
@@ -41,9 +40,9 @@ import java.util.List;
  * This class manages the updating of an island's hopper limit offset.
  */
 public class LimitManager {
-    private final @NotNull HopperLimitUpgrades hopperLimitUpgrades;
-    private final @NotNull LocaleManager localeManager;
-    private final @NotNull IslandsManager islandsManager;
+    private final @NonNull HopperLimitUpgrades hopperLimitUpgrades;
+    private final @NonNull LocaleManager localeManager;
+    private final @NonNull IslandsManager islandsManager;
 
     /**
      * Constructor
@@ -51,8 +50,8 @@ public class LimitManager {
      * @param localeManager A {@link LocaleManager} instance.
      */
     public LimitManager(
-            @NotNull HopperLimitUpgrades hopperLimitUpgrades,
-            @NotNull LocaleManager localeManager) {
+            @NonNull HopperLimitUpgrades hopperLimitUpgrades,
+            @NonNull LocaleManager localeManager) {
         this.hopperLimitUpgrades = hopperLimitUpgrades;
         this.localeManager = localeManager;
         this.islandsManager = BentoBox.getInstance().getIslandsManager();
@@ -65,9 +64,9 @@ public class LimitManager {
      * @param amount The amount to set the hopper limit offset to.
      * @return true if successful, otherwise false.
      */
-    public boolean setHopperLimitOffset(@NotNull CommandSender sender, @NotNull Player targetPlayer, int amount) {
-        @NotNull Locale locale = localeManager.getLocale();
-        @NotNull Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
+    public boolean setHopperLimitOffset(@NonNull CommandSender sender, @NonNull Player targetPlayer, int amount) {
+        Locale locale = localeManager.getConfiguration();
+        Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
         BlockLimitsListener blockLimitListener = limitsAddon.getBlockLimitListener();
 
         List<TagResolver.Single> placeholders = new ArrayList<>();
@@ -78,7 +77,7 @@ public class LimitManager {
             return false;
         }
 
-        @Nullable Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
+        Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
             sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
@@ -103,9 +102,9 @@ public class LimitManager {
      * @param amount The amount to add to the hopper limit offset.
      * @return true if successful, otherwise false.
      */
-    public boolean addHopperLimitOffset(@NotNull CommandSender sender, @NotNull Player targetPlayer, int amount) {
-        @NotNull Locale locale = localeManager.getLocale();
-        @NotNull Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
+    public boolean addHopperLimitOffset(@NonNull CommandSender sender, @NonNull Player targetPlayer, int amount) {
+        Locale locale = localeManager.getConfiguration();
+        Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
         BlockLimitsListener blockLimitListener = limitsAddon.getBlockLimitListener();
 
         List<TagResolver.Single> placeholders = new ArrayList<>();
@@ -116,7 +115,7 @@ public class LimitManager {
             return false;
         }
 
-        @Nullable Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
+        Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
             sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
@@ -144,9 +143,9 @@ public class LimitManager {
      * @param amount The amount to remove from the hopper limit offset.
      * @return true if successful, otherwise false.
      */
-    public boolean removeHopperLimitOffset(@NotNull CommandSender sender, @NotNull Player targetPlayer, int amount) {
-        @NotNull Locale locale = localeManager.getLocale();
-        @NotNull Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
+    public boolean removeHopperLimitOffset(@NonNull CommandSender sender, @NonNull Player targetPlayer, int amount) {
+        Locale locale = localeManager.getConfiguration();
+        Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
         BlockLimitsListener blockLimitListener = limitsAddon.getBlockLimitListener();
 
         List<TagResolver.Single> placeholders = new ArrayList<>();
@@ -157,7 +156,7 @@ public class LimitManager {
             return false;
         }
 
-        @Nullable Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
+        Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
             sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
@@ -185,15 +184,15 @@ public class LimitManager {
      * @param targetPlayer The {@link Player} to get their island's hopper limit offset for.
      * @return true if successful, otherwise false.
      */
-    public boolean sendHopperLimitOffsetMessage(@NotNull CommandSender sender, @NotNull Player targetPlayer) {
-        @NotNull Locale locale = localeManager.getLocale();
-        @NotNull Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
+    public boolean sendHopperLimitOffsetMessage(@NonNull CommandSender sender, @NonNull Player targetPlayer) {
+        Locale locale = localeManager.getConfiguration();
+        Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
         BlockLimitsListener blockLimitListener = limitsAddon.getBlockLimitListener();
 
         List<TagResolver.Single> placeholders = new ArrayList<>();
         placeholders.add(Placeholder.parsed("player_name", targetPlayer.getName()));
 
-        @Nullable Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
+        Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
             sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
