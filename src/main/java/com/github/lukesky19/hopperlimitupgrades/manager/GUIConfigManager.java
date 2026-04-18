@@ -19,12 +19,14 @@ package com.github.lukesky19.hopperlimitupgrades.manager;
 
 import com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades;
 import com.github.lukesky19.hopperlimitupgrades.config.GUIConfig;
-import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.configuration.abstracts.SimpleConfigManager;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * This class manages the plugin's GUI configuration.
@@ -39,26 +41,49 @@ public class GUIConfigManager extends SimpleConfigManager<GUIConfig> {
     }
 
     @Override
-    protected void saveBundledConfig() {
+    public void saveDefaultConfiguration() {
         plugin.saveResource("gui.yml", false);
     }
 
     @Override
     public @Nullable GUIConfig migrateConfiguration(@NonNull GUIConfig guiConfig) {
-        if(guiConfig.version() == 0) {
-            return new GUIConfig(
-                    1,
-                    guiConfig.guiName(),
-                    guiConfig.guiType(),
-                    guiConfig.filler(),
-                    guiConfig.nextPage(),
-                    guiConfig.prevPage(),
-                    guiConfig.exit(),
-                    guiConfig.dummyButtons(),
-                    guiConfig.upgradeButtons());
-        }
+        switch(guiConfig.version()) {
+            case 2 -> {
+                // Latest version, do nothing
+                return guiConfig;
+            }
 
-        return guiConfig;
+            case 1, 0 -> {
+                List<GUIConfig.UpgradeButtonConfig> migratedUpgradeButtons = guiConfig.upgradeButtons().stream()
+                        .map(upgradeButtonConfig ->
+                                new GUIConfig.UpgradeButtonConfig(
+                                        upgradeButtonConfig.purchasableItem(),
+                                        upgradeButtonConfig.purchasedItem(),
+                                        upgradeButtonConfig.slot(),
+                                        upgradeButtonConfig.offsetAmount(),
+                                        new GUIConfig.PriceConfig(
+                                                upgradeButtonConfig.price(),
+                                                null),
+                                        null))
+                        .toList();
+
+                return new GUIConfig(
+                        2,
+                        guiConfig.guiName(),
+                        guiConfig.guiType(),
+                        guiConfig.filler(),
+                        guiConfig.nextPage(),
+                        guiConfig.prevPage(),
+                        guiConfig.exit(),
+                        guiConfig.dummyButtons(),
+                        migratedUpgradeButtons);
+            }
+
+            default -> {
+                logger.warn(AdventureUtility.plain("Unable to migrate gui configuration due to an unsupported version: " + guiConfig.version()));
+                return null;
+            }
+        }
     }
 
     @Override

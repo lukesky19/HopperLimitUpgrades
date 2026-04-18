@@ -17,9 +17,9 @@
 */
 package com.github.lukesky19.hopperlimitupgrades.config;
 
-import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import com.github.lukesky19.skylib.paper.api.gui.GUIType;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -65,7 +65,8 @@ public record GUIConfig(
      * @param purchasedItem The {@link ItemStackConfig} for the {@link ItemStack} to show when the upgrade is already purchased.
      * @param slot The slot to place the {@link ItemStack} at.
      * @param offsetAmount The offset amount for the upgrade.
-     * @param price The price to purchase the upgrade.
+     * @param prices The prices to purchase the upgrade.
+     * @param price The legacy money price to purchase the upgrade. For migration purposes only.
      */
     @ConfigSerializable
     public record UpgradeButtonConfig(
@@ -73,5 +74,16 @@ public record GUIConfig(
             @NonNull ItemStackConfig purchasedItem,
             @Nullable Integer slot,
             @Nullable Integer offsetAmount,
-            @Nullable Double price) {}
+            @NonNull PriceConfig prices,
+            @Deprecated(since = "1.2.0.0") @Nullable Double price) {}
+
+    /**
+     * This record contains the configuration for the prices for an upgrade.
+     * @param money The money required.
+     * @param playerPoints The player points required.
+     */
+    @ConfigSerializable
+    public record PriceConfig(
+            @Nullable Double money,
+            @Nullable Integer playerPoints) {}
 }

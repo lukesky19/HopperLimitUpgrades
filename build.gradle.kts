@@ -1,9 +1,9 @@
 plugins {
-    java
+    `java-library`
 }
 
 group = "com.github.lukesky19"
-version = "1.1.1.0"
+version = "1.2.0.0"
 
 repositories {
     mavenCentral()
@@ -28,21 +28,29 @@ repositories {
         name = "bentobox-repo"
     }
 
+    maven("https://repo.rosewooddev.io/repository/public/") {
+        name = "RoseWood"
+    }
+
     mavenLocal()
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("com.github.lukesky19:SkyLib:1.5.0.0")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
+    // Paper
+    compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
 
-    // Hooks
+    // SkyLib
+    compileOnly("com.github.lukesky19:SkyLib:2.0.0.0")
+
+    // Integration
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("world.bentobox:bentobox:3.10.1-SNAPSHOT")
-    compileOnly("world.bentobox:limits:1.27.0-SNAPSHOT")
+    compileOnly("world.bentobox:limits:1.28.1-SNAPSHOT")
+    compileOnly("org.black_ixx:playerpoints:3.3.3")
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 }
 
 tasks {

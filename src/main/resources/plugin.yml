@@ -5,6 +5,8 @@ api-version: '1.21'
 depend:
     - BentoBox
     - SkyLib
+softdepend:
+    - PlayerPoints
     - Vault
 
 permissions:

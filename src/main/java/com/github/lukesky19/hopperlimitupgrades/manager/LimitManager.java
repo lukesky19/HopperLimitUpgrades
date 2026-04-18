@@ -17,20 +17,18 @@
 */
 package com.github.lukesky19.hopperlimitupgrades.manager;
 
-import com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades;
 import com.github.lukesky19.hopperlimitupgrades.config.Locale;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.hopperlimitupgrades.integration.HookManager;
+import com.github.lukesky19.hopperlimitupgrades.integration.hooks.BentoBoxHook;
+import com.github.lukesky19.hopperlimitupgrades.integration.hooks.LimitsAddonHook;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
-import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.database.objects.Island;
-import world.bentobox.bentobox.managers.IslandsManager;
-import world.bentobox.limits.Limits;
-import world.bentobox.limits.listeners.BlockLimitsListener;
 import world.bentobox.limits.objects.IslandBlockCount;
 
 import java.util.ArrayList;
@@ -40,21 +38,19 @@ import java.util.List;
  * This class manages the updating of an island's hopper limit offset.
  */
 public class LimitManager {
-    private final @NonNull HopperLimitUpgrades hopperLimitUpgrades;
     private final @NonNull LocaleManager localeManager;
-    private final @NonNull IslandsManager islandsManager;
+    private final @NonNull HookManager hookManager;
 
     /**
      * Constructor
-     * @param hopperLimitUpgrades A {@link HopperLimitUpgrades} instance.
      * @param localeManager A {@link LocaleManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      */
     public LimitManager(
-            @NonNull HopperLimitUpgrades hopperLimitUpgrades,
-            @NonNull LocaleManager localeManager) {
-        this.hopperLimitUpgrades = hopperLimitUpgrades;
+            @NonNull LocaleManager localeManager,
+            @NonNull HookManager hookManager) {
         this.localeManager = localeManager;
-        this.islandsManager = BentoBox.getInstance().getIslandsManager();
+        this.hookManager = hookManager;
     }
 
     /**
@@ -66,31 +62,31 @@ public class LimitManager {
      */
     public boolean setHopperLimitOffset(@NonNull CommandSender sender, @NonNull Player targetPlayer, int amount) {
         Locale locale = localeManager.getConfiguration();
-        Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
-        BlockLimitsListener blockLimitListener = limitsAddon.getBlockLimitListener();
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        LimitsAddonHook limitsAddon = hookManager.getHook(LimitsAddonHook.class);
 
         List<TagResolver.Single> placeholders = new ArrayList<>();
         placeholders.add(Placeholder.parsed("player_name", targetPlayer.getName()));
 
         if(amount < 0) {
-            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.amountMustBePositive()));
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.amountMustBePositive()));
             return false;
         }
 
-        Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
+        Island island = bentoBoxHook.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
-            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
         }
-        IslandBlockCount islandBlockCount = blockLimitListener.getIsland(island);
+        IslandBlockCount islandBlockCount = limitsAddon.getIslandBlockCount(island);
 
-        islandBlockCount.setBlockLimitsOffset(Material.HOPPER, amount);
-        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER) + islandBlockCount.getBlockLimitOffset(Material.HOPPER);
+        islandBlockCount.setBlockLimitsOffset(Material.HOPPER.getKey(), amount);
+        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
 
-        targetPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
-        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
+        targetPlayer.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
+        sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
 
         return true;
     }
@@ -104,34 +100,34 @@ public class LimitManager {
      */
     public boolean addHopperLimitOffset(@NonNull CommandSender sender, @NonNull Player targetPlayer, int amount) {
         Locale locale = localeManager.getConfiguration();
-        Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
-        BlockLimitsListener blockLimitListener = limitsAddon.getBlockLimitListener();
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        LimitsAddonHook limitsAddon = hookManager.getHook(LimitsAddonHook.class);
 
         List<TagResolver.Single> placeholders = new ArrayList<>();
         placeholders.add(Placeholder.parsed("player_name", targetPlayer.getName()));
 
         if(amount < 0) {
-            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.amountMustBePositive()));
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.amountMustBePositive()));
             return false;
         }
 
-        Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
+        Island island = bentoBoxHook.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
-            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
         }
-        IslandBlockCount islandBlockCount = blockLimitListener.getIsland(island);
+        IslandBlockCount islandBlockCount = limitsAddon.getIslandBlockCount(island);
 
-        int updatedCount = islandBlockCount.getBlockLimitOffset(Material.HOPPER) + amount;
+        int updatedCount = islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey()) + amount;
 
-        islandBlockCount.setBlockLimitsOffset(Material.HOPPER, updatedCount);
+        islandBlockCount.setBlockLimitsOffset(Material.HOPPER.getKey(), updatedCount);
 
-        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER) + islandBlockCount.getBlockLimitOffset(Material.HOPPER);
+        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
 
-        targetPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
-        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
+        targetPlayer.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
+        sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
 
         return true;
     }
@@ -145,35 +141,35 @@ public class LimitManager {
      */
     public boolean removeHopperLimitOffset(@NonNull CommandSender sender, @NonNull Player targetPlayer, int amount) {
         Locale locale = localeManager.getConfiguration();
-        Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
-        BlockLimitsListener blockLimitListener = limitsAddon.getBlockLimitListener();
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        LimitsAddonHook limitsAddon = hookManager.getHook(LimitsAddonHook.class);
 
         List<TagResolver.Single> placeholders = new ArrayList<>();
         placeholders.add(Placeholder.parsed("player_name", targetPlayer.getName()));
 
         if(amount < 0) {
-            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.amountMustBePositive()));
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.amountMustBePositive()));
             return false;
         }
 
-        Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
+        Island island = bentoBoxHook.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
-            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
         }
-        IslandBlockCount islandBlockCount = blockLimitListener.getIsland(island);
+        IslandBlockCount islandBlockCount = limitsAddon.getIslandBlockCount(island);
 
-        int updatedCount = islandBlockCount.getBlockLimitOffset(Material.HOPPER) - amount;
+        int updatedCount = islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey()) - amount;
         if(updatedCount < 0) updatedCount = 0;
 
-        islandBlockCount.setBlockLimitsOffset(Material.HOPPER, updatedCount);
+        islandBlockCount.setBlockLimitsOffset(Material.HOPPER.getKey(), updatedCount);
 
-        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER) + islandBlockCount.getBlockLimitOffset(Material.HOPPER);
+        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
 
-        targetPlayer.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
-        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
+        targetPlayer.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.hopperLimitUpdated(), placeholders));
+        sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.playerHopperLimitUpdated(), placeholders));
 
         return true;
     }
@@ -186,24 +182,24 @@ public class LimitManager {
      */
     public boolean sendHopperLimitOffsetMessage(@NonNull CommandSender sender, @NonNull Player targetPlayer) {
         Locale locale = localeManager.getConfiguration();
-        Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
-        BlockLimitsListener blockLimitListener = limitsAddon.getBlockLimitListener();
+        BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
+        LimitsAddonHook limitsAddon = hookManager.getHook(LimitsAddonHook.class);
 
         List<TagResolver.Single> placeholders = new ArrayList<>();
         placeholders.add(Placeholder.parsed("player_name", targetPlayer.getName()));
 
-        Island island = islandsManager.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
+        Island island = bentoBoxHook.getPrimaryIsland(targetPlayer.getWorld(), targetPlayer.getUniqueId());
         if(island == null) {
-            sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
             return false;
         }
 
-        IslandBlockCount islandBlockCount = blockLimitListener.getIsland(island);
-        int count = islandBlockCount.getBlockLimitOffset(Material.HOPPER);
+        IslandBlockCount islandBlockCount = limitsAddon.getIslandBlockCount(island);
+        int count = islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(count)));
 
-        sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.playerHopperLimitOffset(), placeholders));
+        sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.playerHopperLimitOffset(), placeholders));
 
         return true;
     }

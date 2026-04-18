@@ -1,4 +1,4 @@
-version: 1
+version: 2
 prefix: "<gold><bold>HopperLimitUpgrades</bold></gold><gray> ▪ </gray>"
 reload: "<dark_green>The plugin has been reloaded.</dark_green>"
 help:
@@ -18,7 +18,9 @@ player-only: "<red>The upgrade GUI can only be open by players.</red>"
 not-on-island: "<red>You must be on an island to open the upgrade GUI.</red>"
 island-member-or-owner-only: "<red>Only the island owner and island members can open the upgrade GUI.</red>"
 gui-open-error: "<red>Unable to open this GUI because of a configuration error.</red>"
-insufficient-funds: "<red>You do not have enough money for this upgrade.</red>"
+insufficient-money: "<red>You do not have enough money for this upgrade.</red>"
+insufficient-player-points: "<red>You do not have enough player points for this upgrade.</red>"
+upgrade-price-error: "<red>Unable to process upgrade due to a server error.</red>"
 hopper-limit-upgraded: "<dark_green>Upgraded hopper limit to <aqua><amount></aqua>.</dark_green>"
 hopper-limit-updated: "<dark_green>Your hopper limit was updated to <aqua><amount></aqua>.</dark_green>"
 player-hopper-limit-updated: "<dark_green>Player <aqua><player_name></aqua>'s hopper limit was updated to <aqua><amount></aqua>.</dark_green>"

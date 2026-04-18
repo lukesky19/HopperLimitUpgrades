@@ -1,5 +1,5 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-version: 1
+version: 2
 gui-name: "<gold><bold>Hopper Limit Upgrades</bold></gold>"
 gui-type: CHEST_27
 filler:
@@ -67,8 +67,10 @@ upgrade-buttons:
         # This is the additional amount to set for the player's island.
         # So 25 + 10 = 35 (base_amount + offset_amount = total_amount)
         offset-amount: 10
-        # The cost to buy the additional offset.
-        price: 75000
+        # The prices to buy the additional offset.
+        prices:
+            money: 75000.0
+            player-points: 0
     -   purchasable-item:
             item-type: HOPPER
             name: "<aqua>45 Hopper Limit</aqua>"
@@ -85,8 +87,10 @@ upgrade-buttons:
         # This is the additional amount to set for the player's island.
         # So 25 + 20 = 45 (base_amount + offset_amount = total_amount)
         offset-amount: 20
-        # The cost to buy the additional offset.
-        price: 90000
+        # The prices to buy the additional offset.
+        prices:
+            money: 90000.0
+            player-points: 0
     -   purchasable-item:
             item-type: HOPPER
             name: "<aqua>55 Hopper Limit</aqua>"
@@ -103,8 +107,10 @@ upgrade-buttons:
         # This is the additional amount to set for the player's island.
         # So 25 + 30 = 55 (base_amount + offset_amount = total_amount)
         offset-amount: 30
-        # The cost to buy the additional offset.
-        price: 105000
+        # The prices to buy the additional offset.
+        prices:
+            money: 105000.0
+            player-points: 0
     -   purchasable-item:
             item-type: HOPPER
             name: "<aqua>65 Hopper Limit</aqua>"
@@ -121,8 +127,10 @@ upgrade-buttons:
         # This is the additional amount to set for the player's island.
         # So 25 + 40 = 65 (base_amount + offset_amount = total_amount)
         offset-amount: 40
-        # The cost to buy the additional offset.
-        price: 135000
+        # The prices to buy the additional offset.
+        prices:
+            money: 135000.0
+            player-points: 0
     -   purchasable-item:
             item-type: HOPPER
             name: "<aqua>75 Hopper Limit</aqua>"
@@ -139,5 +147,7 @@ upgrade-buttons:
         # This is the additional amount to set for the player's island.
         # So 25 + 50 = 75 (base_amount + offset_amount = total_amount)
         offset-amount: 50
-        # The cost to buy the additional offset.
-        price: 150000
+        # The prices to buy the additional offset.
+        prices:
+            money: 150000.0
+            player-points: 0

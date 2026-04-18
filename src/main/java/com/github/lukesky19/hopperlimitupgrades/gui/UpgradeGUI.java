@@ -20,18 +20,21 @@ package com.github.lukesky19.hopperlimitupgrades.gui;
 import com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades;
 import com.github.lukesky19.hopperlimitupgrades.config.GUIConfig;
 import com.github.lukesky19.hopperlimitupgrades.config.Locale;
+import com.github.lukesky19.hopperlimitupgrades.integration.HookManager;
+import com.github.lukesky19.hopperlimitupgrades.integration.hooks.EconomyHook;
+import com.github.lukesky19.hopperlimitupgrades.integration.hooks.LimitsAddonHook;
+import com.github.lukesky19.hopperlimitupgrades.integration.hooks.PlayerPointsHook;
 import com.github.lukesky19.hopperlimitupgrades.manager.GUIConfigManager;
 import com.github.lukesky19.hopperlimitupgrades.manager.LocaleManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.GUIButton;
-import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.impl.UUIDGUIManager;
-import com.github.lukesky19.skylib.api.gui.templates.ChestGUI;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.gui.GUIButton;
+import com.github.lukesky19.skylib.paper.api.gui.GUIType;
+import com.github.lukesky19.skylib.paper.api.gui.impl.UUIDGUIManager;
+import com.github.lukesky19.skylib.paper.api.gui.templates.ChestGUI;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -42,8 +45,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import world.bentobox.bentobox.database.objects.Island;
-import world.bentobox.limits.Limits;
-import world.bentobox.limits.listeners.BlockLimitsListener;
 import world.bentobox.limits.objects.IslandBlockCount;
 
 import java.util.List;
@@ -55,8 +56,8 @@ import java.util.UUID;
  * Creates the GUI to upgrade an island's hopper limit.
  */
 public class UpgradeGUI extends ChestGUI<UUID> {
-    private final @NonNull HopperLimitUpgrades hopperLimitUpgrades;
     private final @NonNull LocaleManager localeManager;
+    private final @NonNull HookManager hookManager;
     private final @NonNull Island island;
     private final @Nullable GUIConfig guiConfig;
 
@@ -66,6 +67,7 @@ public class UpgradeGUI extends ChestGUI<UUID> {
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param guiManager A {@link UUIDGUIManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      * @param player The {@link Player} viewing the GUI.
      * @param island The {@link Island} to apply hopper limit offsets to.
      */
@@ -74,12 +76,13 @@ public class UpgradeGUI extends ChestGUI<UUID> {
             @NonNull GUIConfigManager guiConfigManager,
             @NonNull UUIDGUIManager guiManager,
             @NonNull LocaleManager localeManager,
+            @NonNull HookManager hookManager,
             @NonNull Player player,
             @NonNull Island island) {
         super(hopperLimitUpgrades, guiManager, player.getUniqueId(), player);
 
-        this.hopperLimitUpgrades = hopperLimitUpgrades;
         this.localeManager = localeManager;
+        this.hookManager = hookManager;
 
         this.island = island;
         this.guiConfig = guiConfigManager.getConfiguration();
@@ -91,13 +94,13 @@ public class UpgradeGUI extends ChestGUI<UUID> {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the upgrade GUI due to invalid gui configuration."));
+            logger.warn(AdventureUtility.deserialize("Unable to create the InventoryView for the upgrade GUI due to invalid gui configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the upgrade GUI due to an invalid GUIType."));
+            logger.warn(AdventureUtility.deserialize("Unable to create the InventoryView for the upgrade GUI due to an invalid GUIType."));
             return false;
         }
 
@@ -115,13 +118,13 @@ public class UpgradeGUI extends ChestGUI<UUID> {
         clearButtons();
 
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
+            logger.warn(AdventureUtility.deserialize("Unable to add buttons to the GUI as the gui configuration is invalid."));
             return false;
         }
 
         // If the InventoryView was not created, log a warning and return false.
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtility.deserialize("Unable to add buttons to the GUI as the InventoryView was not created."));
             return false;
         }
 
@@ -204,7 +207,7 @@ public class UpgradeGUI extends ChestGUI<UUID> {
 
         guiConfig.dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the upgrade GUI due to an invalid slot."));
+                logger.warn(AdventureUtility.deserialize("Unable to add a dummy button to the upgrade GUI due to an invalid slot."));
                 return;
             }
 
@@ -230,7 +233,7 @@ public class UpgradeGUI extends ChestGUI<UUID> {
 
         // Check if the slot is not configured and send a warning.
         if(guiConfig.exit().slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to add a exit button due to a slot not being configured."));
+            logger.warn(AdventureUtility.deserialize("Unable to add a exit button due to a slot not being configured."));
             return;
         }
 
@@ -246,7 +249,7 @@ public class UpgradeGUI extends ChestGUI<UUID> {
         optionalItemStack.ifPresent(itemStack -> {
             GUIButton.Builder guiButtonBuilder = new GUIButton.Builder();
             guiButtonBuilder.setItemStack(itemStack);
-            guiButtonBuilder.setAction(event -> close());
+            guiButtonBuilder.setAction(_ -> close());
 
             setButton(guiConfig.exit().slot(), guiButtonBuilder.build());
         });
@@ -258,59 +261,97 @@ public class UpgradeGUI extends ChestGUI<UUID> {
     private void createUpgrades() {
         Locale locale = localeManager.getConfiguration();
         if(guiConfig == null) return;
-        Limits limitsAddon = hopperLimitUpgrades.getLimitsAddon();
-        BlockLimitsListener blockLimitListener = limitsAddon.getBlockLimitListener();
+        LimitsAddonHook limitsAddon = hookManager.getHook(LimitsAddonHook.class);
 
-        IslandBlockCount islandBlockCount = blockLimitListener.getIsland(island);
-        int hopperLimitOffset = islandBlockCount.getBlockLimitOffset(Material.HOPPER);
+        IslandBlockCount islandBlockCount = limitsAddon.getIslandBlockCount(island);
+        int hopperLimitOffset = islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
 
-        for(GUIConfig.UpgradeButtonConfig upgradeButtonConfig : guiConfig.upgradeButtons()) {
-            if(upgradeButtonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a upgrade button to the upgrade GUI due to an invalid slot."));
+        for(GUIConfig.UpgradeButtonConfig buttonConfig : guiConfig.upgradeButtons()) {
+            if(buttonConfig.slot() == null) {
+                logger.warn(AdventureUtility.deserialize("Unable to add a upgrade button to the upgrade GUI due to an invalid slot."));
                 continue;
             }
 
-            if(upgradeButtonConfig.price() == null || upgradeButtonConfig.price() <= 0) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a upgrade button to the upgrade GUI due to an invalid price."));
+            GUIConfig.PriceConfig priceConfig = buttonConfig.prices();
+            boolean hasMoney = priceConfig.money() != null && priceConfig.money() > 0;
+            boolean hasPoints = priceConfig.playerPoints() != null && priceConfig.playerPoints() > 0;
+            if(!hasMoney && !hasPoints) {
+                logger.warn(AdventureUtility.deserialize("Unable to add a upgrade button to the upgrade GUI due to an invalid price configuration."));
                 continue;
             }
 
-            if(upgradeButtonConfig.offsetAmount() == null || upgradeButtonConfig.offsetAmount() <= 0) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a upgrade button to the upgrade GUI due to an invalid offset amount."));
+            if(buttonConfig.offsetAmount() == null || buttonConfig.offsetAmount() <= 0) {
+                logger.warn(AdventureUtility.deserialize("Unable to add a upgrade button to the upgrade GUI due to an invalid offset amount."));
                 continue;
             }
 
-            if(hopperLimitOffset < upgradeButtonConfig.offsetAmount()) {
-                ItemStackConfig itemStackConfig = upgradeButtonConfig.purchasableItem();
+            if(hopperLimitOffset < buttonConfig.offsetAmount()) {
+                ItemStackConfig itemStackConfig = buttonConfig.purchasableItem();
                 ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
                 itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
+
                 Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
                 if(optionalItemStack.isPresent()) {
                     GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
                     upgradeBuilder.setItemStack(optionalItemStack.get());
+
                     upgradeBuilder.setAction(inventoryClickEvent -> {
                         Player player = (Player) inventoryClickEvent.getWhoClicked();
-                        Economy economy = hopperLimitUpgrades.getEconomy();
+                        EconomyHook economyHook = hookManager.getHook(EconomyHook.class);
+                        PlayerPointsHook playerPointsHook = hookManager.getHook(PlayerPointsHook.class);
 
-                        if(economy.getBalance(player) >= upgradeButtonConfig.price()) {
-                            economy.withdrawPlayer(player, upgradeButtonConfig.price());
-                            islandBlockCount.setBlockLimitsOffset(Material.HOPPER, upgradeButtonConfig.offsetAmount());
-
-                            int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER) + islandBlockCount.getBlockLimitOffset(Material.HOPPER);
-                            List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
-
-                            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperLimitUpgraded(), placeholders));
-
-                            update();
-                        } else {
-                            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.insufficientFunds()));
+                        if(hasMoney) {
+                            if(economyHook.isHooked()) {
+                                if(economyHook.getBalance(player) < priceConfig.money()) {
+                                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.insufficientMoney()));
+                                    return;
+                                }
+                            } else {
+                                logger.warn(AdventureUtility.plain("An upgrade button has money configured, but no economy is hooked into."));
+                                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.upgradePriceError()));
+                                return;
+                            }
                         }
+
+                        if(hasPoints) {
+                            if(playerPointsHook.isHooked()) {
+                                if(playerPointsHook.getBalance(player) < priceConfig.playerPoints()) {
+                                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.insufficientPlayerPoints()));
+                                    return;
+                                }
+                            } else {
+                                logger.warn(AdventureUtility.plain("An upgrade button has money configured, but no economy is hooked into."));
+                                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.upgradePriceError()));
+                                return;
+                            }
+                        }
+
+                        // Remove appropriate prices from player
+                        if(hasMoney && economyHook.isHooked()) {
+                            economyHook.removeFromBalance(player, priceConfig.money());
+                        }
+                        if(hasPoints && playerPointsHook.isHooked()) {
+                            playerPointsHook.removeFromBalance(player, priceConfig.playerPoints());
+                        }
+
+                        // Update limit
+                        islandBlockCount.setBlockLimitsOffset(Material.HOPPER.getKey(), buttonConfig.offsetAmount());
+
+                        // Create placeholders for confirmation message
+                        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
+                        List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
+
+                        // Send player confirmation message
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.hopperLimitUpgraded(), placeholders));
+
+                        // Refresh the GUI
+                        update();
                     });
 
-                    setButton(upgradeButtonConfig.slot(), upgradeBuilder.build());
+                    setButton(buttonConfig.slot(), upgradeBuilder.build());
                 }
             } else {
-                ItemStackConfig itemStackConfig = upgradeButtonConfig.purchasedItem();
+                ItemStackConfig itemStackConfig = buttonConfig.purchasedItem();
                 ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
                 itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
                 Optional<@NonNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
@@ -318,7 +359,7 @@ public class UpgradeGUI extends ChestGUI<UUID> {
                     GUIButton.Builder upgradeBuilder = new GUIButton.Builder();
                     upgradeBuilder.setItemStack(optionalItemStack.get());
 
-                    setButton(upgradeButtonConfig.slot(), upgradeBuilder.build());
+                    setButton(buttonConfig.slot(), upgradeBuilder.build());
                 }
             }
         }

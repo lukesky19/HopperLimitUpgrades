@@ -20,8 +20,8 @@ package com.github.lukesky19.hopperlimitupgrades.manager;
 import com.github.lukesky19.hopperlimitupgrades.HopperLimitUpgrades;
 import com.github.lukesky19.hopperlimitupgrades.config.Locale;
 import com.github.lukesky19.hopperlimitupgrades.config.Settings;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.common.abstracts.config.SimpleConfigManager;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.configuration.abstracts.SimpleConfigManager;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -35,7 +35,7 @@ import java.util.List;
 public class LocaleManager extends SimpleConfigManager<Locale> {
     private final @NonNull SettingsManager settingsManager;
     private final @NonNull Locale DEFAULT_LOCALE = new Locale(
-            1,
+            2,
             "<gold><bold>HopperLimitUpgrades</bold></gold><gray> ▪ </gray>",
             "<dark_green>The plugin has been reloaded.</dark_green>",
             List.of("<aqua>HopperLimitUpgrades is developed by <white><bold>lukeskywlker19</bold></white>.</aqua>",
@@ -55,6 +55,9 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
             "<red>Only the island owner and island members can open the upgrade GUI.</red>",
             "<red>Unable to open this GUI because of a configuration error.</red>",
             "<red>You do not have enough money for this upgrade.</red>",
+            "<red>You do not have enough money for this upgrade.</red>",
+            "<red>You do not have enough player points for this upgrade.</red>",
+            "<red>Unable to process upgrade due to a server error.</red>",
             "<dark_green>Upgraded hopper limit to <aqua><amount</aqua>.</dark_green>",
             "<dark_green>Your hopper limit was updated to <aqua><amount</aqua>.</dark_green>",
             "<dark_green>Player <aqua><player_name></aqua>'s hopper limit was updated to <aqua><amount></aqua>.</dark_green>",
@@ -89,51 +92,63 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
     public void loadConfiguration() {
         Settings settings = settingsManager.getConfiguration();
         if(settings == null) {
-            logger.error(AdventureUtil.deserialize("<red>Failed to load plugin's locale due to plugin settings being null.</red>"));
+            logger.error(AdventureUtility.deserialize("<red>Failed to load plugin's locale due to plugin settings being null.</red>"));
             return;
         }
         if(settings.locale() == null) {
-            logger.error(AdventureUtil.deserialize("<red>Failed to load plugin's locale to use in settings.yml is null.</red>"));
+            logger.error(AdventureUtility.deserialize("<red>Failed to load plugin's locale to use in settings.yml is null.</red>"));
             return;
         }
 
         String localeString = settings.locale();
-        Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + (localeString + ".yml"));
+        Path path = Path.of(plugin.getDirectoryFile() + File.separator + "locale" + File.separator + (localeString + ".yml"));
         setConfigurationPath(path);
 
         super.loadConfiguration();
     }
 
     @Override
-    protected void saveBundledConfig() {
-        Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + "en_US.yml");
-        if (!path.toFile().exists()) {
+    public void saveDefaultConfiguration() {
+        Path path = Path.of(plugin.getDirectoryFile() + File.separator + "locale" + File.separator + "en_US.yml");
+        if(!path.toFile().exists()) {
             plugin.saveResource("locale" + File.separator + "en_US.yml", false);
         }
     }
 
     @Override
     public @Nullable Locale migrateConfiguration(@NonNull Locale locale) {
-        if(locale.version() == 0) {
-            return new Locale(
-                    1,
-                    locale.prefix(),
-                    locale.reload(),
-                    locale.help(),
-                    locale.playerOnly(),
-                    locale.notOnIsland(),
-                    locale.islandMemberOrOwnerOnly(),
-                    locale.guiOpenError(),
-                    locale.insufficientFunds(),
-                    locale.hopperLimitUpgraded(),
-                    locale.hopperLimitUpdated(),
-                    locale.playerHopperLimitUpdated(),
-                    locale.playerHopperLimitOffset(),
-                    locale.amountMustBePositive(),
-                    locale.islandNotFound());
-        }
+        switch(locale.version()) {
+            case 2 -> {
+                return locale;
+            }
 
-        return locale;
+            case 1, 0 -> {
+                return new Locale(
+                        2,
+                        locale.prefix(),
+                        locale.reload(),
+                        locale.help(),
+                        locale.playerOnly(),
+                        locale.notOnIsland(),
+                        locale.islandMemberOrOwnerOnly(),
+                        locale.guiOpenError(),
+                        null,
+                        locale.insufficientFunds(),
+                        "<red>You do not have enough player points for this upgrade.</red>",
+                        "<red>Unable to process upgrade due to a server error.</red>",
+                        locale.hopperLimitUpgraded(),
+                        locale.hopperLimitUpdated(),
+                        locale.playerHopperLimitUpdated(),
+                        locale.playerHopperLimitOffset(),
+                        locale.amountMustBePositive(),
+                        locale.islandNotFound());
+            }
+
+            default -> {
+                logger.warn(AdventureUtility.plain("Unable to migrate locale configuration due to an unsupported version: " + locale.version()));
+                return null;
+            }
+        }
     }
 
     @Override
@@ -146,14 +161,15 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
                 || locale.notOnIsland() == null
                 || locale.islandMemberOrOwnerOnly() == null
                 || locale.guiOpenError() == null
-                || locale.insufficientFunds() == null
+                || locale.insufficientMoney() == null
+                || locale.insufficientPlayerPoints() == null
                 || locale.hopperLimitUpgraded() == null
                 || locale.hopperLimitUpdated() == null
                 || locale.playerHopperLimitUpdated() == null
                 || locale.playerHopperLimitOffset() == null
                 || locale.amountMustBePositive() == null
                 || locale.islandNotFound() == null) {
-            logger.warn(AdventureUtil.deserialize("The plugin's config version or one of the plugin's locale messages is null. Double-check your configuration. The default locale will be used."));
+            logger.warn(AdventureUtility.deserialize("The plugin's config version or one of the plugin's locale messages is null. Double-check your configuration. The default locale will be used."));
             return false;
         }
 

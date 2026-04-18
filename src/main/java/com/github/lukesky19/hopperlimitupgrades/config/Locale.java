@@ -19,6 +19,7 @@ package com.github.lukesky19.hopperlimitupgrades.config;
 
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -32,7 +33,10 @@ import java.util.List;
  * @param notOnIsland The message sent when a player is not on an island.
  * @param islandMemberOrOwnerOnly The message sent when a player is not the island owner or an island member.
  * @param guiOpenError The message sent when the upgrade GUI fails to open.
- * @param insufficientFunds The message sent when a player lacks the funds to purchase an upgrade.
+ * @param insufficientFunds The legacy message sent when a player lacks the funds (money) to purchase an upgrade. For migration purposes only.
+ * @param insufficientMoney The message sent when a player lacks the money to purchase an upgrade.
+ * @param insufficientPlayerPoints The message sent when a player lacks the player points to purchase an upgrade.
+ * @param upgradePriceError The message sent to a player when an update purchase fails due to a configuration or server error (missing plugin for configured price).
  * @param hopperLimitUpgraded The message sent when a player's island hopper limit has been upgraded.
  * @param hopperLimitUpdated The message sent to a player whose island's hopper limit was manually updated.
  * @param playerHopperLimitUpdated The message sent to the command sender who updated another player's island's hopper limit.
@@ -50,7 +54,10 @@ public record Locale(
         String notOnIsland,
         String islandMemberOrOwnerOnly,
         String guiOpenError,
-        String insufficientFunds,
+        @Deprecated(since = "1.2.0.0") @Nullable String insufficientFunds,
+        String insufficientMoney,
+        String insufficientPlayerPoints,
+        String upgradePriceError,
         String hopperLimitUpgraded,
         String hopperLimitUpdated,
         String playerHopperLimitUpdated,
