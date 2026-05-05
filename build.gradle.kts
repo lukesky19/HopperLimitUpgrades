@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.github.lukesky19"
-version = "1.2.0.0"
+version = "1.3.0.0"
 
 repositories {
     mavenCentral()
@@ -44,8 +44,8 @@ dependencies {
 
     // Integration
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
-    compileOnly("world.bentobox:bentobox:3.10.1-SNAPSHOT")
-    compileOnly("world.bentobox:limits:1.28.1-SNAPSHOT")
+    compileOnly("world.bentobox:bentobox:3.18.0-SNAPSHOT")
+    compileOnly("world.bentobox:limits:1.28.2-SNAPSHOT")
     compileOnly("org.black_ixx:playerpoints:3.3.3")
 }
 

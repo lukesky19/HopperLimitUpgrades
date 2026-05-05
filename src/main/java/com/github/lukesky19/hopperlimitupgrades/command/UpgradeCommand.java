@@ -108,7 +108,7 @@ public class UpgradeCommand {
                 return 0;
             }
 
-            UpgradeGUI gui = new UpgradeGUI(hopperLimitUpgrades, guiConfigManager, guiManager, localeManager, hookManager, player, island);
+            UpgradeGUI gui = new UpgradeGUI(hopperLimitUpgrades, guiConfigManager, guiManager, localeManager, hookManager, player, island, player.getWorld().getEnvironment());
             boolean createResult = gui.create();
             if(!createResult) {
                 player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
@@ -151,7 +151,7 @@ public class UpgradeCommand {
                     CommandSender sender = ctx.getSource().getSender();
                     Player targetPlayer = ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
 
-                    return limitManager.setHopperLimitOffset(sender, targetPlayer, 0) ? 1 : 0;
+                    return limitManager.setHopperLimitOffset(sender, targetPlayer, targetPlayer.getWorld().getEnvironment(), 0) ? 1 : 0;
                 })));
         
         builder.then(Commands.literal("reload")
@@ -180,7 +180,7 @@ public class UpgradeCommand {
                         Player targetPlayer = ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
                         int amount = ctx.getArgument("amount", IntegerRangeProvider.class).range().lowerEndpoint();
 
-                        return limitManager.setHopperLimitOffset(sender, targetPlayer, amount) ? 1 : 0;
+                        return limitManager.setHopperLimitOffset(sender, targetPlayer, targetPlayer.getWorld().getEnvironment(), amount) ? 1 : 0;
                     }))));
 
         builder.then(Commands.literal("add")
@@ -192,7 +192,7 @@ public class UpgradeCommand {
                         Player targetPlayer = ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
                         int amount = ctx.getArgument("amount", IntegerRangeProvider.class).range().lowerEndpoint();
 
-                        return limitManager.addHopperLimitOffset(sender, targetPlayer, amount) ? 1 : 0;
+                        return limitManager.addHopperLimitOffset(sender, targetPlayer, targetPlayer.getWorld().getEnvironment(), amount) ? 1 : 0;
                     }))));
 
         builder.then(Commands.literal("remove")
@@ -204,7 +204,7 @@ public class UpgradeCommand {
                         Player targetPlayer = ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
                         int amount = ctx.getArgument("amount", IntegerRangeProvider.class).range().lowerEndpoint();
 
-                        return limitManager.removeHopperLimitOffset(sender, targetPlayer, amount) ? 1 : 0;
+                        return limitManager.removeHopperLimitOffset(sender, targetPlayer, targetPlayer.getWorld().getEnvironment(), amount) ? 1 : 0;
                     }))));
 
         builder.then(Commands.literal("get")
@@ -214,7 +214,7 @@ public class UpgradeCommand {
                     CommandSender sender = ctx.getSource().getSender();
                     Player targetPlayer = ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst();
 
-                    return limitManager.sendHopperLimitOffsetMessage(sender, targetPlayer) ? 1 : 0;
+                    return limitManager.sendHopperLimitOffsetMessage(sender, targetPlayer, targetPlayer.getWorld().getEnvironment()) ? 1 : 0;
                 })));
 
         return builder.build();

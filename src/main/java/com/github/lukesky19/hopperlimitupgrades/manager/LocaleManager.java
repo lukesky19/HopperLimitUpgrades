@@ -118,8 +118,31 @@ public class LocaleManager extends SimpleConfigManager<Locale> {
     @Override
     public @Nullable Locale migrateConfiguration(@NonNull Locale locale) {
         switch(locale.version()) {
-            case 2 -> {
+            case 3 -> {
+                // Latest version, do nothing
                 return locale;
+            }
+
+            case 2 -> {
+                return new Locale(
+                        3,
+                        locale.prefix(),
+                        locale.reload(),
+                        locale.help(),
+                        locale.playerOnly(),
+                        locale.notOnIsland(),
+                        locale.islandMemberOrOwnerOnly(),
+                        locale.guiOpenError(),
+                        null,
+                        locale.insufficientMoney(),
+                        locale.insufficientPlayerPoints(),
+                        locale.upgradePriceError(),
+                        locale.hopperLimitUpgraded(),
+                        locale.hopperLimitUpdated(),
+                        locale.playerHopperLimitUpdated(),
+                        locale.playerHopperLimitOffset(),
+                        locale.amountMustBePositive(),
+                        locale.islandNotFound());
             }
 
             case 1, 0 -> {

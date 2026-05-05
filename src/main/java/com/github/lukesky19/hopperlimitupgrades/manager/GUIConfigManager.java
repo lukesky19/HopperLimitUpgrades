@@ -48,9 +48,22 @@ public class GUIConfigManager extends SimpleConfigManager<GUIConfig> {
     @Override
     public @Nullable GUIConfig migrateConfiguration(@NonNull GUIConfig guiConfig) {
         switch(guiConfig.version()) {
-            case 2 -> {
+            case 3 -> {
                 // Latest version, do nothing
                 return guiConfig;
+            }
+
+            case 2 -> {
+                return new GUIConfig(
+                        3,
+                        guiConfig.guiName(),
+                        guiConfig.guiType(),
+                        guiConfig.filler(),
+                        guiConfig.nextPage(),
+                        guiConfig.prevPage(),
+                        guiConfig.exit(),
+                        guiConfig.dummyButtons(),
+                        guiConfig.upgradeButtons());
             }
 
             case 1, 0 -> {

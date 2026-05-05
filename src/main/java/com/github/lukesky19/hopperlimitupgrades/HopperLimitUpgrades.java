@@ -19,7 +19,6 @@ package com.github.lukesky19.hopperlimitupgrades;
 
 import com.github.lukesky19.hopperlimitupgrades.command.UpgradeCommand;
 import com.github.lukesky19.hopperlimitupgrades.integration.HookManager;
-import com.github.lukesky19.hopperlimitupgrades.integration.hooks.LimitsAddonHook;
 import com.github.lukesky19.hopperlimitupgrades.manager.GUIConfigManager;
 import com.github.lukesky19.hopperlimitupgrades.manager.LimitManager;
 import com.github.lukesky19.hopperlimitupgrades.manager.LocaleManager;
@@ -57,9 +56,6 @@ public final class HopperLimitUpgrades extends SkyPlugin {
         if(!checkSkyLibVersion()) return;
 
         HookManager hookManager = new HookManager(this);
-        LimitsAddonHook limitsAddonHook = hookManager.getHook(LimitsAddonHook.class);
-        if(!limitsAddonHook.isHooked()) return;
-
         settingsManager = new SettingsManager(this);
         localeManager = new LocaleManager(this, settingsManager);
         guiConfigManager = new GUIConfigManager(this);

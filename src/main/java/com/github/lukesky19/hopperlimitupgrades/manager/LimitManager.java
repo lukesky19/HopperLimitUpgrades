@@ -25,6 +25,7 @@ import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
@@ -57,10 +58,15 @@ public class LimitManager {
      * Set the hopper limit offset for an island.
      * @param sender The {@link CommandSender}.
      * @param targetPlayer The {@link Player} to update their island's hopper limit offset for.
+     * @param environment The {@link World.Environment} to set the hopper limit offset for.
      * @param amount The amount to set the hopper limit offset to.
      * @return true if successful, otherwise false.
      */
-    public boolean setHopperLimitOffset(@NonNull CommandSender sender, @NonNull Player targetPlayer, int amount) {
+    public boolean setHopperLimitOffset(
+            @NonNull CommandSender sender,
+            @NonNull Player targetPlayer,
+            World.@NonNull Environment environment,
+            int amount) {
         Locale locale = localeManager.getConfiguration();
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         LimitsAddonHook limitsAddon = hookManager.getHook(LimitsAddonHook.class);
@@ -79,9 +85,13 @@ public class LimitManager {
             return false;
         }
         IslandBlockCount islandBlockCount = limitsAddon.getIslandBlockCount(island);
+        if(islandBlockCount == null) {
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            return false;
+        }
 
-        islandBlockCount.setBlockLimitsOffset(Material.HOPPER.getKey(), amount);
-        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
+        islandBlockCount.setBlockLimitsOffset(environment, Material.HOPPER.getKey(), amount);
+        int updatedAmount = islandBlockCount.getBlockLimit(environment, Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(environment, Material.HOPPER.getKey());
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
 
@@ -95,10 +105,15 @@ public class LimitManager {
      * Add to the hopper limit offset for an island.
      * @param sender The {@link CommandSender}.
      * @param targetPlayer The {@link Player} to update their island's hopper limit offset for.
+     * @param environment The {@link World.Environment} to add the hopper limit offset to.
      * @param amount The amount to add to the hopper limit offset.
      * @return true if successful, otherwise false.
      */
-    public boolean addHopperLimitOffset(@NonNull CommandSender sender, @NonNull Player targetPlayer, int amount) {
+    public boolean addHopperLimitOffset(
+            @NonNull CommandSender sender,
+            @NonNull Player targetPlayer,
+            World.@NonNull Environment environment,
+            int amount) {
         Locale locale = localeManager.getConfiguration();
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         LimitsAddonHook limitsAddon = hookManager.getHook(LimitsAddonHook.class);
@@ -117,12 +132,16 @@ public class LimitManager {
             return false;
         }
         IslandBlockCount islandBlockCount = limitsAddon.getIslandBlockCount(island);
+        if(islandBlockCount == null) {
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            return false;
+        }
 
-        int updatedCount = islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey()) + amount;
+        int updatedCount = islandBlockCount.getBlockLimitOffset(environment, Material.HOPPER.getKey()) + amount;
 
-        islandBlockCount.setBlockLimitsOffset(Material.HOPPER.getKey(), updatedCount);
+        islandBlockCount.setBlockLimitsOffset(environment, Material.HOPPER.getKey(), updatedCount);
 
-        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
+        int updatedAmount = islandBlockCount.getBlockLimit(environment, Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(environment, Material.HOPPER.getKey());
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
 
@@ -136,10 +155,15 @@ public class LimitManager {
      * Remove from the hopper limit offset for an island.
      * @param sender The {@link CommandSender}.
      * @param targetPlayer The {@link Player} to update their island's hopper limit offset for.
+     * @param environment The {@link World.Environment} to remove the hopper limit offset from.
      * @param amount The amount to remove from the hopper limit offset.
      * @return true if successful, otherwise false.
      */
-    public boolean removeHopperLimitOffset(@NonNull CommandSender sender, @NonNull Player targetPlayer, int amount) {
+    public boolean removeHopperLimitOffset(
+            @NonNull CommandSender sender,
+            @NonNull Player targetPlayer,
+            World.@NonNull Environment environment,
+            int amount) {
         Locale locale = localeManager.getConfiguration();
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         LimitsAddonHook limitsAddon = hookManager.getHook(LimitsAddonHook.class);
@@ -158,13 +182,17 @@ public class LimitManager {
             return false;
         }
         IslandBlockCount islandBlockCount = limitsAddon.getIslandBlockCount(island);
+        if(islandBlockCount == null) {
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            return false;
+        }
 
-        int updatedCount = islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey()) - amount;
+        int updatedCount = islandBlockCount.getBlockLimitOffset(environment, Material.HOPPER.getKey()) - amount;
         if(updatedCount < 0) updatedCount = 0;
 
-        islandBlockCount.setBlockLimitsOffset(Material.HOPPER.getKey(), updatedCount);
+        islandBlockCount.setBlockLimitsOffset(environment, Material.HOPPER.getKey(), updatedCount);
 
-        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
+        int updatedAmount = islandBlockCount.getBlockLimit(environment, Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(environment, Material.HOPPER.getKey());
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
 
@@ -178,9 +206,13 @@ public class LimitManager {
      * Send a message the hopper limit offset for the target player's island.
      * @param sender The {@link CommandSender}.
      * @param targetPlayer The {@link Player} to get their island's hopper limit offset for.
+     * @param environment The {@link World.Environment} to send the hopper limit offset for.
      * @return true if successful, otherwise false.
      */
-    public boolean sendHopperLimitOffsetMessage(@NonNull CommandSender sender, @NonNull Player targetPlayer) {
+    public boolean sendHopperLimitOffsetMessage(
+            @NonNull CommandSender sender,
+            @NonNull Player targetPlayer,
+            World.@NonNull Environment environment) {
         Locale locale = localeManager.getConfiguration();
         BentoBoxHook bentoBoxHook = hookManager.getHook(BentoBoxHook.class);
         LimitsAddonHook limitsAddon = hookManager.getHook(LimitsAddonHook.class);
@@ -195,9 +227,21 @@ public class LimitManager {
         }
 
         IslandBlockCount islandBlockCount = limitsAddon.getIslandBlockCount(island);
-        int count = islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
+        if(islandBlockCount == null) {
+            sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.islandNotFound(), placeholders));
+            return false;
+        }
+        int count = islandBlockCount.getBlockLimitOffset(environment, Material.HOPPER.getKey());
+
+        String environmentName = switch(environment) {
+            case NORMAL -> "Overworld";
+            case NETHER -> "Nether";
+            case THE_END -> "End";
+            case CUSTOM -> throw new RuntimeException("Unable to send hopper offset message due to unsupported environment.");
+        };
 
         placeholders.add(Placeholder.parsed("amount", String.valueOf(count)));
+        placeholders.add(Placeholder.parsed("dimension", environmentName));
 
         sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.playerHopperLimitOffset(), placeholders));
 

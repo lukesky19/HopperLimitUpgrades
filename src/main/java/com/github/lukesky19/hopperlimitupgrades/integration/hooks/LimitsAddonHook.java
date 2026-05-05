@@ -17,10 +17,10 @@
 */
 package com.github.lukesky19.hopperlimitupgrades.integration.hooks;
 
-import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.github.lukesky19.skylib.common.api.integration.Hook;
 import com.github.lukesky19.skylib.paper.api.plugin.SkyPlugin;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import world.bentobox.bentobox.BentoBox;
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.database.objects.Island;
@@ -35,8 +35,7 @@ import java.util.Optional;
  */
 public class LimitsAddonHook implements Hook {
     private final @NonNull SkyPlugin skyPlugin;
-    private Limits limits;
-    private BlockLimitsListener blockLimitsListener;
+    private @Nullable BlockLimitsListener blockLimitsListener;
 
     /**
      * Constructor
@@ -44,8 +43,6 @@ public class LimitsAddonHook implements Hook {
      */
     public LimitsAddonHook(@NonNull SkyPlugin skyPlugin) {
         this.skyPlugin = skyPlugin;
-
-        initialize();
     }
 
     /**
@@ -56,15 +53,9 @@ public class LimitsAddonHook implements Hook {
         if(!skyPlugin.getServer().getPluginManager().isPluginEnabled("BentoBox")) return;
 
         Optional<Addon> optionalAddon = BentoBox.getInstance().getAddonsManager().getAddonByName("Limits");
-        if(optionalAddon.isEmpty()) {
-            skyPlugin.getComponentLogger().error(AdventureUtility.plain("HopperLimitUpgrades has been disabled due to no Limits addon dependency found!"));
+        if(optionalAddon.isEmpty()) return;
 
-            skyPlugin.getServer().getPluginManager().disablePlugin(skyPlugin);
-
-            return;
-        }
-
-        limits = (Limits) optionalAddon.get();
+        Limits limits = (Limits) optionalAddon.get();
         blockLimitsListener = limits.getBlockLimitListener();
     }
 
@@ -74,16 +65,17 @@ public class LimitsAddonHook implements Hook {
      */
     @Override
     public boolean isHooked() {
-        return limits != null && blockLimitsListener != null;
+        return blockLimitsListener != null;
     }
 
     /**
      * Get the {@link IslandBlockCount} for the island.
      * @param island The {@link Island}.
-     * @return The {@link IslandBlockCount}.
+     * @return The {@link IslandBlockCount} or null.
      */
-    public @NonNull IslandBlockCount getIslandBlockCount(@NonNull Island island) {
-        if(blockLimitsListener == null) blockLimitsListener = limits.getBlockLimitListener();
+    public @Nullable IslandBlockCount getIslandBlockCount(@NonNull Island island) {
+        if(blockLimitsListener == null) initialize();
+        if(blockLimitsListener == null) return null;
 
         return blockLimitsListener.getIsland(island);
     }

@@ -36,6 +36,7 @@ import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -61,6 +62,9 @@ public class UpgradeGUI extends ChestGUI<UUID> {
     private final @NonNull Island island;
     private final @Nullable GUIConfig guiConfig;
 
+    private final World.@NonNull Environment environment;
+    private final @NonNull String environmentName;
+
     /**
      * Constructor
      * @param hopperLimitUpgrades A {@link HopperLimitUpgrades} instance.
@@ -70,6 +74,7 @@ public class UpgradeGUI extends ChestGUI<UUID> {
      * @param hookManager A {@link HookManager} instance.
      * @param player The {@link Player} viewing the GUI.
      * @param island The {@link Island} to apply hopper limit offsets to.
+     * @param environment The {@link World.Environment} to apply limits to.
      */
     public UpgradeGUI(
             @NonNull HopperLimitUpgrades hopperLimitUpgrades,
@@ -78,7 +83,8 @@ public class UpgradeGUI extends ChestGUI<UUID> {
             @NonNull LocaleManager localeManager,
             @NonNull HookManager hookManager,
             @NonNull Player player,
-            @NonNull Island island) {
+            @NonNull Island island,
+            World.@NonNull Environment environment) {
         super(hopperLimitUpgrades, guiManager, player.getUniqueId(), player);
 
         this.localeManager = localeManager;
@@ -86,6 +92,14 @@ public class UpgradeGUI extends ChestGUI<UUID> {
 
         this.island = island;
         this.guiConfig = guiConfigManager.getConfiguration();
+        this.environment = environment;
+
+        environmentName = switch(environment) {
+            case NORMAL -> "Overworld";
+            case NETHER -> "Nether";
+            case THE_END -> "End";
+            case CUSTOM -> throw new RuntimeException("Unsupported environment.");
+        };
     }
 
     /**
@@ -106,7 +120,7 @@ public class UpgradeGUI extends ChestGUI<UUID> {
 
         String guiName = Objects.requireNonNullElse(guiConfig.guiName(), "");
 
-        return create(guiType, guiName, List.of());
+        return create(guiType, guiName, List.of(Placeholder.parsed("dimension", environmentName)));
     }
 
     /**
@@ -264,7 +278,8 @@ public class UpgradeGUI extends ChestGUI<UUID> {
         LimitsAddonHook limitsAddon = hookManager.getHook(LimitsAddonHook.class);
 
         IslandBlockCount islandBlockCount = limitsAddon.getIslandBlockCount(island);
-        int hopperLimitOffset = islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
+        if(islandBlockCount == null) return;
+        int hopperLimitOffset = islandBlockCount.getBlockLimitOffset(environment, Material.HOPPER.getKey());
 
         for(GUIConfig.UpgradeButtonConfig buttonConfig : guiConfig.upgradeButtons()) {
             if(buttonConfig.slot() == null) {
@@ -335,11 +350,13 @@ public class UpgradeGUI extends ChestGUI<UUID> {
                         }
 
                         // Update limit
-                        islandBlockCount.setBlockLimitsOffset(Material.HOPPER.getKey(), buttonConfig.offsetAmount());
+                        islandBlockCount.setBlockLimitsOffset(environment, Material.HOPPER.getKey(), buttonConfig.offsetAmount());
 
                         // Create placeholders for confirmation message
-                        int updatedAmount = islandBlockCount.getBlockLimit(Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(Material.HOPPER.getKey());
-                        List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("amount", String.valueOf(updatedAmount)));
+                        int updatedAmount = islandBlockCount.getBlockLimit(environment, Material.HOPPER.getKey()) + islandBlockCount.getBlockLimitOffset(environment, Material.HOPPER.getKey());
+                        List<TagResolver.Single> placeholders = List.of(
+                                Placeholder.parsed("amount", String.valueOf(updatedAmount)),
+                                Placeholder.parsed("dimension", environmentName.toLowerCase()));
 
                         // Send player confirmation message
                         player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.hopperLimitUpgraded(), placeholders));

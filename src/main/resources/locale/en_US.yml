@@ -1,4 +1,4 @@
-version: 2
+version: 3
 prefix: "<gold><bold>HopperLimitUpgrades</bold></gold><gray> ▪ </gray>"
 reload: "<dark_green>The plugin has been reloaded.</dark_green>"
 help:
@@ -23,7 +23,7 @@ insufficient-player-points: "<red>You do not have enough player points for this 
 upgrade-price-error: "<red>Unable to process upgrade due to a server error.</red>"
 hopper-limit-upgraded: "<dark_green>Upgraded hopper limit to <aqua><amount></aqua>.</dark_green>"
 hopper-limit-updated: "<dark_green>Your hopper limit was updated to <aqua><amount></aqua>.</dark_green>"
-player-hopper-limit-updated: "<dark_green>Player <aqua><player_name></aqua>'s hopper limit was updated to <aqua><amount></aqua>.</dark_green>"
-player-hopper-limit-offset: "<dark_green><player_name></aqua>'s hopper limit offset is <aqua><amount></aqua>.</dark_green>"
+player-hopper-limit-updated: "<dark_green>Player <aqua><player_name></aqua>'s hopper limit for dimension <aqua><dimension></aqua> was updated to <aqua><amount></aqua>.</dark_green>"
+player-hopper-limit-offset: "<dark_green><player_name></aqua>'s hopper limit offset for dimension <aqua><dimension></aqua> is <aqua><amount></aqua>.</dark_green>"
 amount-must-be-positive: "<red>The hopper limit amount must be positive.</red>"
 island-not-found: "<red>No island was found for player <aqua><player_name></aqua>.</red>"

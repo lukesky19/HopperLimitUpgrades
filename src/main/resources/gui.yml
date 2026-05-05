@@ -1,6 +1,6 @@
 # DO NOT TOUCH! This is used to update the config file format if needed.
-version: 2
-gui-name: "<gold><bold>Hopper Limit Upgrades</bold></gold>"
+version: 3
+gui-name: "<gold><bold>Hopper Limit Upgrades</bold></gold> <white>-</white> <dimension>"
 gui-type: CHEST_27
 filler:
     item-type: gray_stained_glass_pane
